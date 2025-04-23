@@ -12,20 +12,24 @@
 #'
 #' @inheritParams gtexr_arguments
 #'
-#' @return A tibble.
+#' @returns A tibble. Or a list if `.return_raw = TRUE`.
 #' @export
 #' @family Expression Data Endpoints
 #'
 #' @examples
 #' \dontrun{
 #' # median exon expression values for CRP, filtered for whole blood
-#' get_median_exon_expression(gencodeIds = "ENSG00000132693.12",
-#'                            tissueSiteDetailIds = "Whole_Blood")
+#' get_median_exon_expression(
+#'   gencodeIds = "ENSG00000132693.12",
+#'   tissueSiteDetailIds = "Whole_Blood"
+#' )
 #' }
 get_median_exon_expression <- function(gencodeIds,
                                        datasetId = "gtex_v8",
                                        tissueSiteDetailIds = NULL,
                                        page = 0,
-                                       itemsPerPage = 250){
+                                       itemsPerPage = getOption("gtexr.itemsPerPage"),
+                                       .verbose = getOption("gtexr.verbose"),
+                                       .return_raw = FALSE) {
   gtex_query(endpoint = "expression/medianExonExpression")
 }

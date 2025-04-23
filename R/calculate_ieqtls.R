@@ -11,31 +11,42 @@
 #'
 #' @inheritParams gtexr_arguments
 #'
-#' @return A tibble.
+#' @returns A tibble. Or a list if `.return_raw = TRUE`.
 #' @export
 #' @family Dynamic Association Endpoints
 #'
 #' @examples
 #' \dontrun{
 #' # perform request
-#' calculate_ieqtls(cellType = "Adipocytes",
-#'                  tissueSiteDetailId = "Adipose_Subcutaneous",
-#'                  gencodeId = "ENSG00000203782.5",
-#'                  variantId = "chr1_1099341_T_C_b38")
+#' calculate_ieqtls(
+#'   cellType = "Adipocytes",
+#'   tissueSiteDetailId = "Adipose_Subcutaneous",
+#'   gencodeId = "ENSG00000203782.5",
+#'   variantId = "chr1_1099341_T_C_b38"
+#' )
 #' }
 calculate_ieqtls <-
   function(cellType,
            tissueSiteDetailId,
            gencodeId,
            variantId,
-           datasetId = "gtex_v8") {
-    gtex_query(endpoint = "association/dynieqtl", return_raw = TRUE) |>
-      purrr::imap(\(x, idx) ifelse(is.list(x),
-                                   tibble::tibble(
-                                     data = purrr::map_depth(x,
-                                                             purrr::pluck_depth(x) - 2,
-                                                             unlist)
-                                   ),
-                                   x)) |>
-      tibble::as_tibble()
+           datasetId = "gtex_v8",
+           .return_raw = FALSE) {
+    gtex_query(endpoint = "association/dynieqtl",
+               process_calculate_ieqtls_resp_json)
   }
+
+process_calculate_ieqtls_resp_json <- function(resp_json) {
+  resp_json |>
+    purrr::imap(\(x, idx) ifelse(is.list(x),
+                                 tibble::tibble(
+                                   data = purrr::map_depth(
+                                     x,
+                                     purrr::pluck_depth(x) - 2,
+                                     unlist
+                                   )
+                                 ),
+                                 x
+    )) |>
+    tibble::as_tibble()
+}

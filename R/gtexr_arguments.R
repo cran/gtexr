@@ -36,13 +36,17 @@
 #'   unversioned gencodeIds.
 #' @param genomeBuild String. Options: "GRCh38/hg38", "GRCh37/hg19". Default =
 #'   "GRCh38/hg38".
+#' @param hardyScale String A Hardy Scale of interest.
+#'   Options: "Ventilator case", "Fast death - violent", "Fast death - natural
+#'   causes", "Intermediate death", "Slow death".
 #' @param hardyScales Character vector. A list of Hardy Scale(s) of interest.
 #'   Options: "Ventilator case", "Fast death - violent", "Fast death - natural
 #'   causes", "Intermediate death", "Slow death".
 #' @param hasExpressionData Logical.
 #' @param hasGenotype Logical.
-#' @param itemsPerPage Integer (default = 250).
-#' @param ischemicTime Integer.
+#' @param itemsPerPage Integer (default = 250). Set globally to maximum value
+#'   100000 with `options(list(gtexr.itemsPerPage = 100000))`.
+#' @param ischemicTimes Integer.
 #' @param ischemicTimeGroups Character vector. Options:
 #'   "<= 0", "1 - 300", "301 - 600", "601 - 900", "901 - 1200", "1201 - 1500", "> 1500".
 #' @param materialTypes String, vector. Options: "Cells:Cell Line Viable",
@@ -67,9 +71,12 @@
 #' @param phenotypeId String. See
 #'   [GTEx portal FAQs](https://www.gtexportal.org/home/faq#splicingPhenotypeId)
 #'   for further details.
-#' @param pos Integer, vector.
+#' @param pos Integer.
+#' @param poss Integer, vector.
 #' @param project_id String. Options: "gtex", "adult-gtex", "egtex".
-#' @param rin Integer vector.
+#' @param .return_raw Logical. If `TRUE`, return the raw API JSON response.
+#'   Default = `FALSE`
+#' @param rins Integer, vector.
 #' @param sampleId String. `^GTEX-[A-Z0-9]{5}-[0-9]{4}-SM-[A-Z0-9]{5}$`
 #' @param sampleIds Character vector. GTEx sample ID.
 #' @param searchTerm String.
@@ -92,9 +99,12 @@
 #'   use [get_tissue_site_detail()] to see valid values).
 #' @param variantId String. A gtex variant ID.
 #' @param variantIds Character vector. Gtex variant IDs.
+#' @param .verbose Logical. If `TRUE` (default), print paging information. Set
+#'   to `FALSE` globally with `options(list(gtexr.verbose = FALSE))`.
 #'
 #' @keywords internal
-#' @return Returns `NULL` invisibly. Used for documentation only.
+#' @returns A tibble of gtexr arguments and their metadata. Used for
+#'   documentation only.
 gtexr_arguments <- function(ageBrackets = NULL,
                             aliquotIds = NULL,
                             attributeSubset = NULL,
@@ -115,11 +125,12 @@ gtexr_arguments <- function(ageBrackets = NULL,
                             geneId = NULL,
                             geneIds = NULL,
                             genomeBuild = NULL,
+                            hardyScale = NULL,
                             hardyScales = NULL,
                             hasExpressionData = NULL,
                             hasGenotype = NULL,
                             itemsPerPage = NULL,
-                            ischemicTime = NULL,
+                            ischemicTimes = NULL,
                             ischemicTimeGroups = NULL,
                             materialTypes = NULL,
                             organizationName = NULL,
@@ -127,8 +138,10 @@ gtexr_arguments <- function(ageBrackets = NULL,
                             pathCategory = NULL,
                             phenotypeId = NULL,
                             pos = NULL,
+                            poss = NULL,
                             project_id = NULL,
-                            rin = NULL,
+                            .return_raw = NULL,
+                            rins = NULL,
                             sampleId = NULL,
                             sampleIds = NULL,
                             searchTerm = NULL,
@@ -143,7 +156,8 @@ gtexr_arguments <- function(ageBrackets = NULL,
                             tissueSiteDetailIds = NULL,
                             uberonIds = NULL,
                             variantId = NULL,
-                            variantIds = NULL) {
+                            variantIds = NULL,
+                            .verbose = NULL) {
   tibble::tribble(
     ~arg, ~type, ~scalar, ~pluralised, ~shinyinput, ~choices,
     "ageBrackets", "character", FALSE, TRUE, "selectInput", c("20-29", "30-39", "40-49", "50-59", "60-69", "70-79"),
@@ -166,20 +180,22 @@ gtexr_arguments <- function(ageBrackets = NULL,
     "geneId", "character", TRUE, FALSE, "textInput", NA,
     "geneIds", "character", FALSE, TRUE, "textAreaInput", NA,
     "genomeBuild", "character", TRUE, FALSE, "selectInput", c("GRCh38/hg38", "GRCh37/hg19"),
-    "hardyScales", "character", FALSE, TRUE, "selectInput", c("Ventilator case", "Fast death - violent", "Fast death - natural causes", "Intermediate death", "Slow death"),
+    "hardyScale", "character", TRUE, FALSE, "selectInput", c("Ventilator case", "Fast death - violent", "Fast death - natural causes", "Intermediate death", "Slow death"),
+    "hardyScales", "character", FALSE, TRUE, "selectizeInput", c("Ventilator case", "Fast death - violent", "Fast death - natural causes", "Intermediate death", "Slow death"),
     "hasExpressionData", "logical", TRUE, FALSE, "checkboxInput", NA,
     "hasGenotype", "logical", TRUE, FALSE, "checkboxInput", NA,
     "itemsPerPage", "integer", TRUE, FALSE, "numericInput", c(0, 100000),
-    "ischemicTime", "integer", FALSE, FALSE, "numericInput", c(-1300, 2100),
+    "ischemicTimes", "integer", FALSE, TRUE, "numericInput", c(-1300, 2100),
     "ischemicTimeGroups", "character", FALSE, TRUE, "selectInput", c("<= 0", "1 - 300", "301 - 600", "601 - 900", "901 - 1200", "1201 - 1500", "> 1500"),
     "materialTypes", "character", FALSE, TRUE, "selectizeInput", c("Cells:Cell Line Viable", "DNA:DNA Genomic", "DNA:DNA Somatic", "RNA:Total RNA", "Tissue:PAXgene Preserved", "Tissue:PAXgene Preserved Paraffin-embedded", "Tissue:Fresh Frozen Tissue"),
     "organizationName", "character", TRUE, FALSE, "selectInput", c("GTEx Consortium", "Kid's First"),
     "page", "integer", TRUE, FALSE, "numericInput", c(0, 1000000),
     "pathCategory", "character", FALSE, FALSE, "selectizeInput", c("adenoma", "amylacea", "atelectasis", "atherosclerosis", "atherosis", "atrophy", "calcification", "cirrhosis", "clean_specimens", "congestion", "corpora_albicantia", "cyst", "desquamation", "diabetic", "dysplasia", "edema", "emphysema", "esophagitis", "fibrosis", "gastritis", "glomerulosclerosis", "goiter", "gynecomastoid", "hashimoto", "heart_failure_cells", "hemorrhage", "hepatitis", "hyalinization", "hypereosinophilia", "hyperplasia", "hypertrophy", "hypoxic", "infarction", "inflammation", "ischemic_changes", "macrophages", "mastopathy", "metaplasia", "monckeberg", "necrosis", "nephritis", "nephrosclerosis", "no_abnormalities", "nodularity", "pancreatitis", "pigment", "pneumonia", "post_menopausal", "prostatitis", "saponification", "scarring", "sclerotic", "solar_elastosis", "spermatogenesis", "steatosis", "sweat_glands", "tma"),
     "phenotypeId", "character", TRUE, FALSE, "textInput", NA,
-    "pos", "integer", FALSE, FALSE, "numericInput", c(0, 248945542),
+    "pos", "integer", TRUE, FALSE, "numericInput", c(0, 248945542),
+    "poss", "integer", FALSE, TRUE, "numericInput", c(0, 248945542),
     "project_id", "character", TRUE, FALSE, "selectInput", c("gtex", "adult-gtex", "egtex"),
-    "rin", "integer", FALSE, FALSE, "numericInput", c(-1e8L, 1e8L),
+    "rins", "numeric", FALSE, TRUE, "numericInput", c(-1e8L, 1e8L),
     "sampleId", "character", TRUE, FALSE, "textInput", NA,
     "sampleIds", "character", FALSE, TRUE, "textAreaInput", NA,
     "searchTerm", "character", TRUE, FALSE, "textInput", NA,

@@ -12,7 +12,7 @@
 #'
 #' @inheritParams gtexr_arguments
 #'
-#' @return A tibble.
+#' @returns A tibble. Or a list if `.return_raw = TRUE`.
 #' @export
 #' @family Expression Data Endpoints
 #'
@@ -24,6 +24,8 @@ get_median_junction_expression <- function(gencodeIds,
                                            datasetId = "gtex_v8",
                                            tissueSiteDetailIds = NULL,
                                            page = 0,
-                                           itemsPerPage = 250){
+                                           itemsPerPage = getOption("gtexr.itemsPerPage"),
+                                           .verbose = getOption("gtexr.verbose"),
+                                           .return_raw = FALSE) {
   gtex_query(endpoint = "expression/medianJunctionExpression")
 }

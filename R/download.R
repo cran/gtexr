@@ -9,7 +9,7 @@
 #'
 #'
 #' @inheritParams gtexr_arguments
-#' @return A tibble
+#' @returns A tibble. Or a list if `.return_raw = TRUE`.
 #' @export
 #' @family Biobank Data Endpoints
 #'
@@ -28,18 +28,21 @@ download <- function(materialTypes = NULL,
                      pathCategory = NULL,
                      tissueSampleIds = NULL,
                      sex = NULL,
-                     sortBy = NULL,
-                     sortDirection = NULL,
+                     sortBy = "sampleId",
+                     sortDirection = "asc",
                      searchTerm = NULL,
                      sampleIds = NULL,
                      subjectIds = NULL,
                      ageBrackets = NULL,
                      hardyScales = NULL,
                      hasExpressionData = NULL,
-                     hasGenotype = NULL) {
-  result <- gtex_query(endpoint = "biobank/download", return_raw = TRUE)
+                     hasGenotype = NULL,
+                     .return_raw = FALSE) {
+  gtex_query(endpoint = "biobank/download", process_download_resp_json)
+}
 
-  result |>
+process_download_resp_json <- function(resp_json) {
+  resp_json |>
     purrr::map(
       \(x) x |>
         purrr::map_at("pathologyNotesCategories", tibble::as_tibble) |>

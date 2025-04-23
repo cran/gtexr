@@ -5,7 +5,7 @@
 #'
 #' @inheritParams gtexr_arguments
 #'
-#' @return A tibble.
+#' @returns A tibble. Or a list if `.return_raw = TRUE`.
 #' @export
 #' @family Histology Endpoints
 #'
@@ -22,12 +22,14 @@
 #' }
 get_image <- function(tissueSampleIds = NULL,
                       page = 0,
-                      itemsPerPage = 250) {
-  resp_body <- gtex_query(endpoint = "histology/image", return_raw = TRUE)
+                      itemsPerPage = getOption("gtexr.itemsPerPage"),
+                      .verbose = getOption("gtexr.verbose"),
+                      .return_raw = FALSE) {
+  gtex_query(endpoint = "histology/image", process_get_image_resp_json)
+}
 
-  paging_info_messages(resp_body)
-
-  resp_body$data |>
+process_get_image_resp_json <- function(resp_json) {
+  resp_json$data |>
     purrr::map(\(x) {
       if (!rlang::is_empty(x$pathologyNotesCategories)) {
         x$pathologyNotesCategories <- tibble::as_tibble(x$pathologyNotesCategories)

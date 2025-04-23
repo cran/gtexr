@@ -250,15 +250,24 @@ endpoint documentation.</li>
 <li>Further notes may be added under <code>@details</code>.</li>
 <li>Arguments
 <ul>
-<li>Names match those for API endpoint, except where the argument
-accepts an array (vector in R) of values, in which case it is
-pluralised.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></li>
+<li>Names match those for API endpoint,<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> except where the
+argument accepts an array (vector in R) of values, in which case it is
+pluralised.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a></li>
 <li>Default values also match those for API endpoint.</li>
 <li>Query parameters flagged as “required” in the GTEx Portal API
-documentation do not have default values.<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a></li>
+documentation do not have default values.<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a></li>
 <li>Are all documented in <code>gtexr_arguments.R</code>. All functions
 therefore use <code>@inheritParams gtexr_arguments</code> for
 documentation.</li>
+<li>All have a <code>.return_raw</code> argument (default value
+<code>FALSE</code>), allowing users to retrieve the raw JSON from an API
+call.</li>
+<li>Functions which return a paginated response should have a
+<code>.verbose</code> argument (default value
+<code>getOption(&quot;gtexr.verbose&quot;)</code>, which is set to
+<code>TRUE</code>) and set argument <code>itemsPerPage</code> to
+<code>getOption(&quot;gtexr.itemsPerPage&quot;)</code> (which is set to 250 by
+default).</li>
 </ul></li>
 <li>Use <code>@family</code> roxygen tag to match categories on API
 documentation. This is used to categorise functions on pkgdown site
@@ -276,15 +285,17 @@ argument values in the gtexr shiny app with a working example.</li>
 <hr />
 <ol>
 <li id="fn1"><p>Note that the <a href="https://gtexportal.org/api/v2/redoc#tag/Reference-Genome-Endpoints/operation/get_genomic_features_api_v2_reference_features__featureId__get">Get
-Genomic Features</a> endpoint takes a path parameter “featureId”. The
-corresponding gtexr argument is prefixed with “.”
+Genomic Features</a> endpoint takes a path parameter “featureId”, for
+which the corresponding gtexr argument is prefixed with “.”
 (<code>.featureId</code>).<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
-<li id="fn2"><p>Note however that while <code>variantId</code> is not
+<li id="fn2"><p>The parameter <code>pathCategory</code> always accepts
+an array however, and is therefore not pluralised.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+<li id="fn3"><p>Note however that while <code>variantId</code> is not
 flagged as “required” for <a href="https://gtexportal.org/api/v2/redoc#tag/Datasets-Endpoints/operation/get_linkage_disequilibrium_by_variant_data_api_v2_dataset_ldByVariant_get">Get
 Linkage Disequilibrium By Variant Data</a>, no default value is provided
 in <code>get_linkage_disequilibrium_by_variant_data()</code> as
 providing <code>NULL</code> or an unrecognised variant ID returns an
-empty response.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+empty response.<a href="#fnref3" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>
 

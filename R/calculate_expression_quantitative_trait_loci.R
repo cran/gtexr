@@ -21,21 +21,25 @@
 #'
 #' @inheritParams gtexr_arguments
 #'
-#' @return A tibble.
+#' @returns A tibble. Or a list if `.return_raw = TRUE`.
 #' @export
 #' @family Dynamic Association Endpoints
 #'
 #' @examples
 #' \dontrun{
 #' # perform request - returns a tibble with a single row
-#' calculate_expression_quantitative_trait_loci(tissueSiteDetailId = "Whole_Blood",
-#'                                              gencodeId = "ENSG00000203782.5",
-#'                                              variantId = "rs79641866")
+#' calculate_expression_quantitative_trait_loci(
+#'   tissueSiteDetailId = "Whole_Blood",
+#'   gencodeId = "ENSG00000203782.5",
+#'   variantId = "rs79641866"
+#' )
 #'
 #' # unnest list columns with tidyr::unnest()
-#' calculate_expression_quantitative_trait_loci(tissueSiteDetailId = "Whole_Blood",
-#'                                              gencodeId = "ENSG00000203782.5",
-#'                                              variantId = "rs79641866") |>
+#' calculate_expression_quantitative_trait_loci(
+#'   tissueSiteDetailId = "Whole_Blood",
+#'   gencodeId = "ENSG00000203782.5",
+#'   variantId = "rs79641866"
+#' ) |>
 #'   tidyr::unnest(c("data", "genotypes"))
 #'
 #' # to calculate minor and alternative allele frequencies
@@ -44,48 +48,49 @@
 #'   gencodeId = "ENSG00000237973.1",
 #'   variantId = "rs12119111"
 #' ) |>
-#'  dplyr::bind_rows(.id = "rsid") |>
-#'
-#'  tidyr::separate(
-#'    col = "variantId",
-#'    into = c(
-#'      "chromosome",
-#'      "position",
-#'      "reference_allele",
-#'      "alternative_allele",
-#'      "genome_build"
-#'    ),
-#'    sep = "_"
-#'  ) |>
-#'
-#'  # ...then ascertain alternative_allele frequency
-#'  dplyr::mutate(
-#'    alt_allele_count = (2 * homoAltCount) + hetCount,
-#'    total_allele_count = 2 * (homoAltCount + hetCount +  homoRefCount),
-#'    alternative_allele_frequency = alt_allele_count / total_allele_count
-#'  ) |>
-#'
-#'  dplyr::select(
-#'    rsid,
-#'    beta = nes,
-#'    se = error,
-#'    pValue,
-#'    minor_allele_frequency = maf,
-#'    alternative_allele_frequency,
-#'    chromosome:genome_build,
-#'    tissueSiteDetailId
-#'  )
+#'   dplyr::bind_rows(.id = "rsid") |>
+#'   tidyr::separate(
+#'     col = "variantId",
+#'     into = c(
+#'       "chromosome",
+#'       "position",
+#'       "reference_allele",
+#'       "alternative_allele",
+#'       "genome_build"
+#'     ),
+#'     sep = "_"
+#'   ) |>
+#'   # ...then ascertain alternative_allele frequency
+#'   dplyr::mutate(
+#'     alt_allele_count = (2 * homoAltCount) + hetCount,
+#'     total_allele_count = 2 * (homoAltCount + hetCount + homoRefCount),
+#'     alternative_allele_frequency = alt_allele_count / total_allele_count
+#'   ) |>
+#'   dplyr::select(
+#'     rsid,
+#'     beta = nes,
+#'     se = error,
+#'     pValue,
+#'     minor_allele_frequency = maf,
+#'     alternative_allele_frequency,
+#'     chromosome:genome_build,
+#'     tissueSiteDetailId
+#'   )
 #' }
 calculate_expression_quantitative_trait_loci <- function(tissueSiteDetailId,
-                           gencodeId,
-                           variantId,
-                           datasetId = "gtex_v8") {
-  result <- gtex_query("association/dyneqtl",
-             return_raw = TRUE)
-  result$data <- list(tibble::tibble(data = as.numeric(result$data)))
-  result$genotypes <- list(tibble::tibble(genotypes = as.integer(result$genotypes)))
+                                                         gencodeId,
+                                                         variantId,
+                                                         datasetId = "gtex_v8",
+                                                         .return_raw = FALSE) {
+  gtex_query(
+    "association/dyneqtl",
+    process_calculate_expression_quantitative_trait_loci_resp_json
+  )
+}
 
-  result <- tibble::as_tibble(result)
+process_calculate_expression_quantitative_trait_loci_resp_json <- function(resp_json) {
+  resp_json$data <- list(tibble::tibble(data = as.numeric(resp_json$data)))
+  resp_json$genotypes <- list(tibble::tibble(genotypes = as.integer(resp_json$genotypes)))
 
-  return(result)
+  return(tibble::as_tibble(resp_json))
 }

@@ -4,7 +4,13 @@
 \alias{get_annotation}
 \title{Get Annotation}
 \usage{
-get_annotation(datasetId = "gtex_v8", page = 0, itemsPerPage = 250)
+get_annotation(
+  datasetId = "gtex_v8",
+  page = 0,
+  itemsPerPage = getOption("gtexr.itemsPerPage"),
+  .verbose = getOption("gtexr.verbose"),
+  .return_raw = FALSE
+)
 }
 \arguments{
 \item{datasetId}{String. Unique identifier of a dataset. Usually includes a
@@ -12,10 +18,17 @@ data source and data release. Options: "gtex_v8", "gtex_snrnaseq_pilot".}
 
 \item{page}{Integer (default = 0).}
 
-\item{itemsPerPage}{Integer (default = 250).}
+\item{itemsPerPage}{Integer (default = 250). Set globally to maximum value
+100000 with \code{options(list(gtexr.itemsPerPage = 100000))}.}
+
+\item{.verbose}{Logical. If \code{TRUE} (default), print paging information. Set
+to \code{FALSE} globally with \code{options(list(gtexr.verbose = FALSE))}.}
+
+\item{.return_raw}{Logical. If \code{TRUE}, return the raw API JSON response.
+Default = \code{FALSE}}
 }
 \value{
-A tibble
+A tibble. Or a list if \code{.return_raw = TRUE}.
 }
 \description{
 This service returns the list of annotations and allowed values
@@ -30,7 +43,7 @@ currently.
 }
 \examples{
 \dontrun{
- get_annotation()
+get_annotation()
 }
 }
 \seealso{
@@ -42,7 +55,7 @@ Other Datasets Endpoints:
 \code{\link{get_functional_annotation}()},
 \code{\link{get_linkage_disequilibrium_by_variant_data}()},
 \code{\link{get_linkage_disequilibrium_data}()},
-\code{\link{get_sample_datasets_endpoints}()},
+\code{\link{get_sample_datasets}()},
 \code{\link{get_subject}()},
 \code{\link{get_tissue_site_detail}()},
 \code{\link{get_variant}()},

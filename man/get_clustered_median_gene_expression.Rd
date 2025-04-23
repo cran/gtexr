@@ -7,7 +7,8 @@
 get_clustered_median_gene_expression(
   gencodeIds,
   datasetId = "gtex_v8",
-  tissueSiteDetailIds = NULL
+  tissueSiteDetailIds = NULL,
+  .return_raw = FALSE
 )
 }
 \arguments{
@@ -20,9 +21,12 @@ data source and data release. Options: "gtex_v8", "gtex_snrnaseq_pilot".}
 \item{tissueSiteDetailIds}{Character vector of IDs for tissues of interest.
 Can be GTEx specific IDs (e.g. "Whole_Blood"; use
 \code{\link[=get_tissue_site_detail]{get_tissue_site_detail()}} to see valid values) or Ontology IDs.}
+
+\item{.return_raw}{Logical. If \code{TRUE}, return the raw API JSON response.
+Default = \code{FALSE}}
 }
 \value{
-A tibble, with clustering data stored as an attribute, "clusters".
+A tibble. Or a list if \code{.return_raw = TRUE}.
 }
 \description{
 Find median gene expression data along with hierarchical
@@ -40,12 +44,16 @@ By default, this service queries the latest GTEx release.
 }
 \examples{
 \dontrun{
-get_clustered_median_gene_expression(gencodeIds = c("ENSG00000203782.5",
-                                                    "ENSG00000132693.12"))
+get_clustered_median_gene_expression(gencodeIds = c(
+  "ENSG00000203782.5",
+  "ENSG00000132693.12"
+))
 
 # clustering data is stored as an attribute "clusters"
-result <- get_clustered_median_gene_expression(c("ENSG00000203782.5",
-                                                 "ENSG00000132693.12"))
+result <- get_clustered_median_gene_expression(c(
+  "ENSG00000203782.5",
+  "ENSG00000132693.12"
+))
 attr(result, "clusters")
 
 # process clustering data with the ape package

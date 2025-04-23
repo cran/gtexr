@@ -1,9 +1,26 @@
-library(shiny)
 library(gtexr)
 library(purrr)
+
+check_packages <- function(pkgs, call = rlang::caller_env()) {
+  missing_pkgs <- pkgs[!pkgs %in% installed.packages()[, "Package"]]
+
+  if (length(missing_pkgs) > 0) {
+    cli::cli_alert_warning("The following packages are missing: {.val {missing_pkgs}}")
+
+    cli::cli_alert_info("Install them using:")
+    cli::cli_text("{.code install.packages(c({paste0('\"', missing_pkgs, '\"', collapse = ', ')}))}")
+
+    cli::cli_abort("Missing required packages.", call = call)
+  }
+}
+
+check_packages(c("shiny", "stringr", "DT"), call = rlang::caller_env())
+
+library(shiny)
 library(stringr)
 library(DT)
-library(tidyselect)
+
+# Set up ------------------------------------------------------------------
 
 gtexr_arguments_metadata <- gtexr:::gtexr_arguments()
 
@@ -123,12 +140,13 @@ endpointUI <- function(id, gtexr_fn, gtexr_arguments_metadata, gtexr_functions_m
   gtexr_fn_args <- get_gtexr_fn_args(gtexr_fn)
   gtexr_fn_metadata <- gtexr_functions_metadata[gtexr_functions_metadata$fn_name == gtexr_fn, ]
 
-  # if (gtexr_fn == "calculate_expression_quantitative_trait_loci") {
+  # if (gtexr_fn == "get_eqtl_genes") {
   #   browser()
   # }
 
   # create a list of UI inputs - one input for each function argument
   query_params <- gtexr_fn_args |>
+    purrr::discard_at(c(".return_raw", ".verbose")) |>
     purrr::imap(\(default_value, arg) {
       arg_metadata <- gtexr_arguments_metadata[gtexr_arguments_metadata$arg == arg,]
 
@@ -142,7 +160,7 @@ endpointUI <- function(id, gtexr_fn, gtexr_arguments_metadata, gtexr_functions_m
 
       # set default values to first example from function documentation
       value <- eval(gtexr_fn_metadata$fn_example_args[[1]][[arg]])
-      if (is.character(value)) {
+      if (is.character(value) & arg_metadata$shinyinput != "selectizeInput") {
         value <- paste(value, sep = "", collapse = "\n")
       }
 
@@ -219,7 +237,7 @@ endpointUI <- function(id, gtexr_fn, gtexr_arguments_metadata, gtexr_functions_m
         tabsetPanel(tabPanel(title = "Result",
                              DT::DTOutput(ns("result"))),
                     tabPanel(title = "Help",
-                             tags$a(href = stringr::str_glue("https://rmgpanw.github.io/gtexr/reference/{gtexr_fn}.html"), "GTExR reference"),
+                             tags$a(href = stringr::str_glue("https://docs.ropensci.org/gtexr/reference/{gtexr_fn}.html"), "GTExR reference"),
                              HTML(gtexr_functions_metadata[gtexr_functions_metadata$fn_name == gtexr_fn, ]$fn_docs_html)),
                     type = "pills"),
         width = 7
@@ -252,7 +270,8 @@ endpointServer <- function(id, gtexr_fn) {
                                purrr::map_at(.at = multiple_text_inputs$arg,
                                              \(x) x |>
                                                stringr::str_split_1("\n") |>
-                                               stringr::str_trim())
+                                               stringr::str_trim()) |>
+                               purrr::compact()
 
                              # create call
                              rlang::call2(gtexr_fn,!!!query_params_input)
@@ -295,7 +314,7 @@ endpointServer <- function(id, gtexr_fn) {
 
         DT::datatable(response() |>
                         dplyr::mutate(dplyr::across(
-                          tidyselect::where(is.list),
+                          dplyr::where(is.list),
                           \(x) "[[data]]"
                         )),
                       rownames = FALSE,
@@ -355,7 +374,7 @@ endpoint_tab_panels <- gtexr_functions_metadata$fn_family |>
 
 ui <-
   navbarPage(
-    title = tags$a(href = "https://rmgpanw.github.io/gtexr/", "GTExR", style = "text-decoration: none; color: black;"),
+    title = tags$a(href = "https://docs.ropensci.org/gtexr/", "GTExR", style = "text-decoration: none; color: black;"),
     !!!endpoint_tab_panels,
     theme = bslib::bs_theme(bootswatch = "lumen"),
     collapsible = TRUE,

@@ -12,23 +12,26 @@
 #'
 #' @inheritParams gtexr_arguments
 #'
-#' @return A tibble
+#' @returns A tibble. Or a list if `.return_raw = TRUE`.
 #' @export
 #' @family Datasets Endpoints
 #'
 #' @examples
 #' \dontrun{
-#'  get_annotation()
+#' get_annotation()
 #' }
 get_annotation <- function(datasetId = "gtex_v8",
                            page = 0,
-                           itemsPerPage = 250){
-  result <- gtex_query(endpoint = "dataset/annotation",
-             return_raw = TRUE)
+                           itemsPerPage = getOption("gtexr.itemsPerPage"),
+                           .verbose = getOption("gtexr.verbose"),
+                           .return_raw = FALSE) {
 
-  paging_info_messages(gtex_response_body = result)
+  gtex_query(endpoint = "dataset/annotation", process_get_annotation_resp_json)
 
-  result$data |>
+}
+
+process_get_annotation_resp_json <- function(resp_json) {
+  resp_json$data |>
     purrr::map(
       \(x) x |>
         purrr::map_at("values", \(x) list(as.character(x))) |>

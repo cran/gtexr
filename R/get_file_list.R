@@ -8,7 +8,9 @@
 #' @details The returned tibble includes a nested list column, "filesets". This
 #'   details files, sub-categorised by fileset (see examples section).
 #'
-#' @return A tibble
+#' @inheritParams gtexr_arguments
+#'
+#' @returns A tibble. Or a list if `.return_raw = TRUE`.
 #' @export
 #' @family Datasets Endpoints
 #'
@@ -19,8 +21,8 @@
 #'
 #' # Get "GTEx Analysis V9" file list
 #' gtex_v9_files <- get_file_list() |>
-#'                    dplyr::filter(name == "GTEx Analysis V9") |>
-#'                    dplyr::pull(filesets)
+#'   dplyr::filter(name == "GTEx Analysis V9") |>
+#'   dplyr::pull(filesets)
 #'
 #' # "GTEx Analysis V9" filesets
 #' names(gtex_v9_files[[1]])
@@ -28,13 +30,18 @@
 #' # "GTEx Analysis V9", "snRNA-Seq Data" fileset files
 #' names(gtex_v9_files[[1]][["snRNA-Seq Data"]]$files)
 #' }
-get_file_list <- function() {
-  result <- gtex_query(endpoint = "dataset/fileList", return_raw = TRUE)
-  result |>
-    purrr::map(\(x) x |>
-                 purrr::map_at("filesets", list) |>
-                 tibble::as_tibble(),
-               .progress = TRUE) |>
+get_file_list <- function(.return_raw = FALSE) {
+  gtex_query(endpoint = "dataset/fileList", process_get_file_list_resp_json)
+}
+
+process_get_file_list_resp_json <- function(resp_json) {
+  resp_json |>
+    purrr::map(
+      \(x) x |>
+        purrr::map_at("filesets", list) |>
+        tibble::as_tibble(),
+      .progress = TRUE
+    ) |>
     dplyr::bind_rows() |>
     # add names to lists ('filesets' and 'files')
     dplyr::mutate("filesets" = purrr::map(.data[["filesets"]], \(x) {

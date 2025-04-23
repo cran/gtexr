@@ -9,7 +9,8 @@ calculate_isqtls(
   tissueSiteDetailId,
   phenotypeId,
   variantId,
-  datasetId = "gtex_v8"
+  datasetId = "gtex_v8",
+  .return_raw = FALSE
 )
 }
 \arguments{
@@ -28,9 +29,12 @@ for further details.}
 
 \item{datasetId}{String. Unique identifier of a dataset. Usually includes a
 data source and data release. Options: "gtex_v8", "gtex_snrnaseq_pilot".}
+
+\item{.return_raw}{Logical. If \code{TRUE}, return the raw API JSON response.
+Default = \code{FALSE}}
 }
 \value{
-A tibble.
+A tibble. Or a list if \code{.return_raw = TRUE}.
 }
 \description{
 Calculate your own Cell Specific sQTLs.
@@ -46,10 +50,12 @@ By default, the calculation is based on the latest GTEx release.
 \examples{
 \dontrun{
 # perform request
-calculate_isqtls(cellType = "Neutrophils",
-                 tissueSiteDetailId = "Whole_Blood",
-                 phenotypeId = "chr1:15947:16607:clu_40980:ENSG00000227232.5",
-                 variantId = "chr1_1099341_T_C_b38")
+calculate_isqtls(
+  cellType = "Neutrophils",
+  tissueSiteDetailId = "Whole_Blood",
+  phenotypeId = "chr1:15947:16607:clu_40980:ENSG00000227232.5",
+  variantId = "chr1_1099341_T_C_b38"
+)
 }
 }
 \seealso{

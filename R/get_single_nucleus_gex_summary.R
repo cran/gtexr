@@ -7,7 +7,7 @@
 #'
 #' @inheritParams gtexr_arguments
 #'
-#' @return A tibble.
+#' @returns A tibble. Or a list if `.return_raw = TRUE`.
 #' @export
 #' @family Expression Data Endpoints
 #'
@@ -17,12 +17,16 @@
 #' get_single_nucleus_gex_summary()
 #'
 #' # filter for specific tissue
-#' get_single_nucleus_gex_summary(tissueSiteDetailIds = c("Breast_Mammary_Tissue",
-#'                                                        "Skin_Sun_Exposed_Lower_leg"))
+#' get_single_nucleus_gex_summary(tissueSiteDetailIds = c(
+#'   "Breast_Mammary_Tissue",
+#'   "Skin_Sun_Exposed_Lower_leg"
+#' ))
 #' }
 get_single_nucleus_gex_summary <- function(datasetId = "gtex_snrnaseq_pilot",
                                            tissueSiteDetailIds = NULL,
                                            page = 0,
-                                           itemsPerPage = 250){
+                                           itemsPerPage = getOption("gtexr.itemsPerPage"),
+                                           .verbose = getOption("gtexr.verbose"),
+                                           .return_raw = FALSE) {
   gtex_query(endpoint = "expression/singleNucleusGeneExpressionSummary")
 }

@@ -10,7 +10,8 @@ get_significant_single_tissue_eqtls_by_location(
   start,
   end,
   chromosome,
-  datasetId = "gtex_v8"
+  datasetId = "gtex_v8",
+  .return_raw = FALSE
 )
 }
 \arguments{
@@ -29,9 +30,12 @@ to see valid values) or an Ontology ID.}
 
 \item{datasetId}{String. Unique identifier of a dataset. Usually includes a
 data source and data release. Options: "gtex_v8", "gtex_snrnaseq_pilot".}
+
+\item{.return_raw}{Logical. If \code{TRUE}, return the raw API JSON response.
+Default = \code{FALSE}}
 }
 \value{
-A tibble.
+A tibble. Or a list if \code{.return_raw = TRUE}.
 }
 \description{
 Find significant single tissue eQTLs using Chromosomal Locations.
@@ -52,7 +56,8 @@ get_significant_single_tissue_eqtls_by_location(
   tissueSiteDetailId = "Artery_Aorta",
   start = 10000,
   end = 250000,
-  chromosome = "chr11")
+  chromosome = "chr11"
+)
 }
 }
 \seealso{

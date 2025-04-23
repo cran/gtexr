@@ -11,7 +11,7 @@
 #' documentation](https://gtexportal.org/api/v2/redoc#tag/Datasets-Endpoints/operation/get_variant_by_location_api_v2_dataset_variantByLocation_get)
 #'
 #' @inheritParams gtexr_arguments
-#' @return A tibble.
+#' @returns A tibble. Or a list if `.return_raw = TRUE`.
 #' @export
 #' @family Datasets Endpoints
 #'
@@ -20,8 +20,8 @@
 get_linkage_disequilibrium_data <- function(gencodeId,
                                             datasetId = "gtex_v8",
                                             page = 0,
-                                            itemsPerPage = 250) {
-  resp_body <- gtex_query(endpoint = "dataset/ld", return_raw = TRUE)
-
-  process_resp_body_linkage_disequilibrium(resp_body)
+                                            itemsPerPage = getOption("gtexr.itemsPerPage"),
+                                            .verbose = getOption("gtexr.verbose"),
+                                            .return_raw = FALSE) {
+  gtex_query(endpoint = "dataset/ld", process_linkage_disequilibrium_resp_json)
 }

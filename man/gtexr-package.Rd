@@ -8,14 +8,14 @@
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-A convenient R interface to the Genotype-Tissue Expression (GTEx) Portal API. For more information on the API, see \url{https://gtexportal.org/api/v2/redoc}.
+A convenient R interface to the Genotype-Tissue Expression (GTEx) Portal API. The GTEx project is a comprehensive public resource for studying tissue-specific gene expression and regulation in human tissues. Through systematic analysis of RNA sequencing data from 54 non-diseased tissue sites across nearly 1000 individuals, GTEx provides crucial insights into the relationship between genetic variation and gene expression. This data is accessible through the GTEx Portal API enabling programmatic access to human gene expression data. For more information on the API, see \url{https://gtexportal.org/api/v2/redoc}.
 }
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://rmgpanw.github.io/gtexr/}
-  \item \url{https://github.com/rmgpanw/gtexr}
-  \item Report bugs at \url{https://github.com/rmgpanw/gtexr/issues}
+  \item \url{https://docs.ropensci.org/gtexr/}
+  \item \url{https://github.com/ropensci/gtexr}
+  \item Report bugs at \url{https://github.com/ropensci/gtexr/issues}
 }
 
 }
@@ -28,6 +28,11 @@ Authors:
   \item Abraham Olvera-Barrios (\href{https://orcid.org/0000-0002-3305-4465}{ORCID})
   \item Chuin Ying Ung (\href{https://orcid.org/0000-0001-8487-4589}{ORCID})
   \item Robert Luben (\href{https://orcid.org/0000-0002-5088-6343}{ORCID})
+}
+
+Other contributors:
+\itemize{
+  \item Zhian N. Kamvar \email{zkamvar@carpentries.org} (\href{https://orcid.org/0000-0003-1458-7108}{ORCID}) [reviewer]
 }
 
 }

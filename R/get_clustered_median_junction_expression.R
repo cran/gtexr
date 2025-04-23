@@ -15,18 +15,22 @@
 #'
 #' @inheritParams gtexr_arguments
 #'
-#' @return A tibble, with clustering data stored as an attribute, "clusters".
+#' @returns A tibble. Or a list if `.return_raw = TRUE`.
 #' @export
 #' @family Expression Data Endpoints
 #'
 #' @examples
 #' \dontrun{
-#' get_clustered_median_junction_expression(gencodeIds = c("ENSG00000203782.5",
-#'                                                     "ENSG00000132693.12"))
+#' get_clustered_median_junction_expression(gencodeIds = c(
+#'   "ENSG00000203782.5",
+#'   "ENSG00000132693.12"
+#' ))
 #'
 #' # clustering data is stored as an attribute "clusters"
-#' result <- get_clustered_median_junction_expression(c("ENSG00000203782.5",
-#'                                                  "ENSG00000132693.12"))
+#' result <- get_clustered_median_junction_expression(c(
+#'   "ENSG00000203782.5",
+#'   "ENSG00000132693.12"
+#' ))
 #' attr(result, "clusters")
 #'
 #' # process clustering data with the ape package
@@ -37,8 +41,12 @@
 #' }
 get_clustered_median_junction_expression <- function(gencodeIds,
                                                      datasetId = "gtex_v8",
-                                                     tissueSiteDetailIds = NULL) {
-  resp_body <- gtex_query(endpoint = "expression/clusteredMedianJunctionExpression", return_raw = TRUE)
+                                                     tissueSiteDetailIds = NULL,
+                                                     .return_raw = FALSE) {
+  gtex_query(endpoint = "expression/clusteredMedianJunctionExpression",
+             process_get_clustered_median_junction_expression_resp_json)
+}
 
-  process_resp_body_clustered_expression(resp_body, expression_item_name = "medianJunctionExpression")
+process_get_clustered_median_junction_expression_resp_json <- function(resp_json) {
+  process_clustered_expression_resp_json(resp_json, "medianJunctionExpression")
 }

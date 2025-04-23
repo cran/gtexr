@@ -4,15 +4,31 @@
 \alias{get_tissue_site_detail}
 \title{Get Tissue Site Detail}
 \usage{
-get_tissue_site_detail(page = 0, itemsPerPage = 250)
+get_tissue_site_detail(
+  datasetId = "gtex_v8",
+  page = 0,
+  itemsPerPage = getOption("gtexr.itemsPerPage"),
+  .verbose = getOption("gtexr.verbose"),
+  .return_raw = FALSE
+)
 }
 \arguments{
+\item{datasetId}{String. Unique identifier of a dataset. Usually includes a
+data source and data release. Options: "gtex_v8", "gtex_snrnaseq_pilot".}
+
 \item{page}{Integer (default = 0).}
 
-\item{itemsPerPage}{Integer (default = 250).}
+\item{itemsPerPage}{Integer (default = 250). Set globally to maximum value
+100000 with \code{options(list(gtexr.itemsPerPage = 100000))}.}
+
+\item{.verbose}{Logical. If \code{TRUE} (default), print paging information. Set
+to \code{FALSE} globally with \code{options(list(gtexr.verbose = FALSE))}.}
+
+\item{.return_raw}{Logical. If \code{TRUE}, return the raw API JSON response.
+Default = \code{FALSE}}
 }
 \value{
-A tibble
+A tibble. Or a list if \code{.return_raw = TRUE}.
 }
 \description{
 Retrieve all tissue site detail information in the database
@@ -21,16 +37,16 @@ Retrieve all tissue site detail information in the database
 }
 \examples{
 \dontrun{
-  # returns a tibble with one row per tissue
-  get_tissue_site_detail()
+# returns a tibble with one row per tissue
+get_tissue_site_detail()
 
-  # `eqtlSampleSummary` and `rnaSeqSampleSummary` are list columns
-  bladder_site_details <- get_tissue_site_detail() |>
-    dplyr::filter(tissueSiteDetailId == "Bladder")
+# `eqtlSampleSummary` and `rnaSeqSampleSummary` are list columns
+bladder_site_details <- get_tissue_site_detail() |>
+  dplyr::filter(tissueSiteDetailId == "Bladder")
 
-  purrr::pluck(bladder_site_details, "eqtlSampleSummary", 1)
+purrr::pluck(bladder_site_details, "eqtlSampleSummary", 1)
 
-  purrr::pluck(bladder_site_details, "rnaSeqSampleSummary", 1)
+purrr::pluck(bladder_site_details, "rnaSeqSampleSummary", 1)
 }
 }
 \seealso{
@@ -43,7 +59,7 @@ Other Datasets Endpoints:
 \code{\link{get_functional_annotation}()},
 \code{\link{get_linkage_disequilibrium_by_variant_data}()},
 \code{\link{get_linkage_disequilibrium_data}()},
-\code{\link{get_sample_datasets_endpoints}()},
+\code{\link{get_sample_datasets}()},
 \code{\link{get_subject}()},
 \code{\link{get_variant}()},
 \code{\link{get_variant_by_location}()}

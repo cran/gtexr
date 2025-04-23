@@ -8,20 +8,25 @@
 #'
 #' @inheritParams gtexr_arguments
 #'
-#' @return A tibble.
+#' @returns A tibble. Or a list if `.return_raw = TRUE`.
 #' @export
 #' @family Datasets Endpoints
 #'
 #' @examples
-#' get_variant_by_location(start = 153209600,
-#'                         end = 153209700,
-#'                         chromosome = "chr1")
+#' get_variant_by_location(
+#'   start = 153209600,
+#'   end = 153209700,
+#'   chromosome = "chr1"
+#' )
 get_variant_by_location <- function(start,
                                     end,
                                     chromosome,
                                     sortBy = "pos",
                                     sortDirection = "asc",
+                                    datasetId = "gtex_v8",
                                     page = 0,
-                                    itemsPerPage = 250) {
+                                    itemsPerPage = getOption("gtexr.itemsPerPage"),
+                                    .verbose = getOption("gtexr.verbose"),
+                                    .return_raw = FALSE) {
   gtex_query(endpoint = "dataset/variantByLocation")
 }

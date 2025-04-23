@@ -9,7 +9,9 @@ get_median_exon_expression(
   datasetId = "gtex_v8",
   tissueSiteDetailIds = NULL,
   page = 0,
-  itemsPerPage = 250
+  itemsPerPage = getOption("gtexr.itemsPerPage"),
+  .verbose = getOption("gtexr.verbose"),
+  .return_raw = FALSE
 )
 }
 \arguments{
@@ -25,10 +27,17 @@ Can be GTEx specific IDs (e.g. "Whole_Blood"; use
 
 \item{page}{Integer (default = 0).}
 
-\item{itemsPerPage}{Integer (default = 250).}
+\item{itemsPerPage}{Integer (default = 250). Set globally to maximum value
+100000 with \code{options(list(gtexr.itemsPerPage = 100000))}.}
+
+\item{.verbose}{Logical. If \code{TRUE} (default), print paging information. Set
+to \code{FALSE} globally with \code{options(list(gtexr.verbose = FALSE))}.}
+
+\item{.return_raw}{Logical. If \code{TRUE}, return the raw API JSON response.
+Default = \code{FALSE}}
 }
 \value{
-A tibble.
+A tibble. Or a list if \code{.return_raw = TRUE}.
 }
 \description{
 Find median exon expression data.
@@ -44,8 +53,10 @@ By default, this service queries the latest GTEx release.
 \examples{
 \dontrun{
 # median exon expression values for CRP, filtered for whole blood
-get_median_exon_expression(gencodeIds = "ENSG00000132693.12",
-                           tissueSiteDetailIds = "Whole_Blood")
+get_median_exon_expression(
+  gencodeIds = "ENSG00000132693.12",
+  tissueSiteDetailIds = "Whole_Blood"
+)
 }
 }
 \seealso{

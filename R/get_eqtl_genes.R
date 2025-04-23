@@ -21,7 +21,7 @@
 #'
 #' @inheritParams gtexr_arguments
 #'
-#' @return A tibble.
+#' @returns A tibble. Or a list if `.return_raw = TRUE`.
 #' @export
 #' @family Static Association Endpoints
 #'
@@ -29,9 +29,11 @@
 #' \dontrun{
 #' get_eqtl_genes(c("Whole_Blood", "Artery_Aorta"))
 #' }
-get_eqtl_genes <- function(tissueSiteDetailIds,
+get_eqtl_genes <- function(tissueSiteDetailIds = NULL,
                            datasetId = "gtex_v8",
                            page = 0,
-                           itemsPerPage = 250) {
+                           itemsPerPage = getOption("gtexr.itemsPerPage"),
+                           .verbose = getOption("gtexr.verbose"),
+                           .return_raw = FALSE) {
   gtex_query(endpoint = "association/egene")
 }

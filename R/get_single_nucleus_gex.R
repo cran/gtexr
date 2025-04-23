@@ -1,4 +1,4 @@
-#' Get Single Nucleux Gex
+#' Get Single Nucleus Gex
 #'
 #' @description Retrieve Single Nucleus Gene Expression Data for a given Gene.
 #'
@@ -7,7 +7,7 @@
 #'
 #' @inheritParams gtexr_arguments
 #'
-#' @return A tibble
+#' @returns A tibble. Or a list if `.return_raw = TRUE`.
 #' @export
 #' @family Expression Data Endpoints
 #'
@@ -16,14 +16,18 @@
 #' # Search for one or more genes - returns a tibble with one row per tissue.
 #' # Column "cellTypes" now contains a tibble of expression summary data, with
 #' # one row for each cell type
-#' get_single_nucleus_gex(gencodeIds = c("ENSG00000203782.5",
-#'                                       "ENSG00000132693.12"))
+#' get_single_nucleus_gex(gencodeIds = c(
+#'   "ENSG00000203782.5",
+#'   "ENSG00000132693.12"
+#' ))
 #'
 #' # `excludeDataArray = FALSE` - expression values are stored under "celltypes"
 #' # in an additional column called "data"
-#' response <- get_single_nucleus_gex(gencodeIds = "ENSG00000132693.12",
-#'                                    excludeDataArray = FALSE,
-#'                                    itemsPerPage = 2)
+#' response <- get_single_nucleus_gex(
+#'   gencodeIds = "ENSG00000132693.12",
+#'   excludeDataArray = FALSE,
+#'   itemsPerPage = 2
+#' )
 #'
 #' response
 #'
@@ -40,36 +44,36 @@ get_single_nucleus_gex <- function(gencodeIds,
                                    tissueSiteDetailIds = NULL,
                                    excludeDataArray = TRUE,
                                    page = 0,
-                                   itemsPerPage = 250) {
-  resp_body <- gtex_query(endpoint = "expression/singleNucleusGeneExpression",
-             return_raw = TRUE)
+                                   itemsPerPage = getOption("gtexr.itemsPerPage"),
+                                   .verbose = getOption("gtexr.verbose"),
+                                   .return_raw = FALSE) {
+  gtex_query(endpoint = "expression/singleNucleusGeneExpression", process_get_single_nucleus_gex_resp_json)
+}
 
-  paging_info_messages(resp_body)
-
-  resp_body$data |>
-
+process_get_single_nucleus_gex_resp_json <- function(resp_json) {
+  resp_json$data |>
     # returns a list of lists, with one list for each tissue type. Aim: return a
     # single row tibble for each tissue type
     purrr::map(\(x) {
       result <- x |>
-
         # for each tissue type, convert "cellTypes" item to a tibble
-        purrr::map_if(is.list,
-                      # "cellTypes" column is a list of lists, one list
-                      # for each cell type
-                      \(x) purrr::map(x, \(x) {
+        purrr::map_if(
+          is.list,
+          # "cellTypes" column is a list of lists, one list
+          # for each cell type
+          \(x) purrr::map(x, \(x) {
+            # process 'data', if `excludeDataArray` is `FALSE`
+            data_values <- unlist(x$data)
 
-                        # process 'data', if `excludeDataArray` is `FALSE`
-                        data_values <- unlist(x$data)
+            if (!is.null(data_values)) {
+              x$data <- list(data_values)
+            }
 
-                        if (!is.null(data_values)) {
-                          x$data <- list(data_values)
-                        }
-
-                        x |>
-                          purrr::compact() |>
-                          tibble::as_tibble()
-                      }))
+            x |>
+              purrr::compact() |>
+              tibble::as_tibble()
+          })
+        )
 
       x$cellTypes <- list(dplyr::bind_rows(result$cellTypes))
 

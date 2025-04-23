@@ -11,19 +11,21 @@
 #'
 #' @inheritParams gtexr_arguments
 #'
-#' @return A tibble.
+#' @returns A tibble. Or a list if `.return_raw = TRUE`.
 #' @export
 #' @family Reference Genome Endpoints
 #'
 #' @examples
 #' \dontrun{
-#' get_exons(gencodeId = "ENSG00000203782.5")
+#' get_exons(gencodeIds = c("ENSG00000132693.12", "ENSG00000203782.5"))
 #' }
-get_exons <- function(gencodeId,
+get_exons <- function(gencodeIds,
                       gencodeVersion = NULL,
                       genomeBuild = NULL,
                       datasetId = "gtex_v8",
                       page = 0,
-                      itemsPerPage = 250) {
+                      itemsPerPage = getOption("gtexr.itemsPerPage"),
+                      .verbose = getOption("gtexr.verbose"),
+                      .return_raw = FALSE) {
   gtex_query(endpoint = "reference/exon")
 }

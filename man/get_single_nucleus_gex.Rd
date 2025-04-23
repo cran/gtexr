@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_single_nucleus_gex.R
 \name{get_single_nucleus_gex}
 \alias{get_single_nucleus_gex}
-\title{Get Single Nucleux Gex}
+\title{Get Single Nucleus Gex}
 \usage{
 get_single_nucleus_gex(
   gencodeIds,
@@ -10,7 +10,9 @@ get_single_nucleus_gex(
   tissueSiteDetailIds = NULL,
   excludeDataArray = TRUE,
   page = 0,
-  itemsPerPage = 250
+  itemsPerPage = getOption("gtexr.itemsPerPage"),
+  .verbose = getOption("gtexr.verbose"),
+  .return_raw = FALSE
 )
 }
 \arguments{
@@ -28,10 +30,17 @@ Can be GTEx specific IDs (e.g. "Whole_Blood"; use
 
 \item{page}{Integer (default = 0).}
 
-\item{itemsPerPage}{Integer (default = 250).}
+\item{itemsPerPage}{Integer (default = 250). Set globally to maximum value
+100000 with \code{options(list(gtexr.itemsPerPage = 100000))}.}
+
+\item{.verbose}{Logical. If \code{TRUE} (default), print paging information. Set
+to \code{FALSE} globally with \code{options(list(gtexr.verbose = FALSE))}.}
+
+\item{.return_raw}{Logical. If \code{TRUE}, return the raw API JSON response.
+Default = \code{FALSE}}
 }
 \value{
-A tibble
+A tibble. Or a list if \code{.return_raw = TRUE}.
 }
 \description{
 Retrieve Single Nucleus Gene Expression Data for a given Gene.
@@ -43,14 +52,18 @@ Retrieve Single Nucleus Gene Expression Data for a given Gene.
 # Search for one or more genes - returns a tibble with one row per tissue.
 # Column "cellTypes" now contains a tibble of expression summary data, with
 # one row for each cell type
-get_single_nucleus_gex(gencodeIds = c("ENSG00000203782.5",
-                                      "ENSG00000132693.12"))
+get_single_nucleus_gex(gencodeIds = c(
+  "ENSG00000203782.5",
+  "ENSG00000132693.12"
+))
 
 # `excludeDataArray = FALSE` - expression values are stored under "celltypes"
 # in an additional column called "data"
-response <- get_single_nucleus_gex(gencodeIds = "ENSG00000132693.12",
-                                   excludeDataArray = FALSE,
-                                   itemsPerPage = 2)
+response <- get_single_nucleus_gex(
+  gencodeIds = "ENSG00000132693.12",
+  excludeDataArray = FALSE,
+  itemsPerPage = 2
+)
 
 response
 

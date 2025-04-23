@@ -7,7 +7,7 @@
 #'
 #' @inheritParams gtexr_arguments
 #'
-#' @return A tibble.
+#' @returns A tibble. Or a list if `.return_raw = TRUE`.
 #' @export
 #' @family Admin Endpoints
 #'
@@ -16,6 +16,8 @@
 #' get_news_item()
 #' }
 get_news_item <- function(page = 0,
-                          itemsPerPage = 250) {
+                          itemsPerPage = getOption("gtexr.itemsPerPage"),
+                          .verbose = getOption("gtexr.verbose"),
+                          .return_raw = FALSE) {
   gtex_query(endpoint = "admin/newsItem")
 }

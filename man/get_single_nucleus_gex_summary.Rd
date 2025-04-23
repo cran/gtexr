@@ -8,7 +8,9 @@ get_single_nucleus_gex_summary(
   datasetId = "gtex_snrnaseq_pilot",
   tissueSiteDetailIds = NULL,
   page = 0,
-  itemsPerPage = 250
+  itemsPerPage = getOption("gtexr.itemsPerPage"),
+  .verbose = getOption("gtexr.verbose"),
+  .return_raw = FALSE
 )
 }
 \arguments{
@@ -21,10 +23,17 @@ Can be GTEx specific IDs (e.g. "Whole_Blood"; use
 
 \item{page}{Integer (default = 0).}
 
-\item{itemsPerPage}{Integer (default = 250).}
+\item{itemsPerPage}{Integer (default = 250). Set globally to maximum value
+100000 with \code{options(list(gtexr.itemsPerPage = 100000))}.}
+
+\item{.verbose}{Logical. If \code{TRUE} (default), print paging information. Set
+to \code{FALSE} globally with \code{options(list(gtexr.verbose = FALSE))}.}
+
+\item{.return_raw}{Logical. If \code{TRUE}, return the raw API JSON response.
+Default = \code{FALSE}}
 }
 \value{
-A tibble.
+A tibble. Or a list if \code{.return_raw = TRUE}.
 }
 \description{
 Retrieve Summarized Single Nucleus Gene Expression Data.
@@ -37,8 +46,10 @@ Retrieve Summarized Single Nucleus Gene Expression Data.
 get_single_nucleus_gex_summary()
 
 # filter for specific tissue
-get_single_nucleus_gex_summary(tissueSiteDetailIds = c("Breast_Mammary_Tissue",
-                                                       "Skin_Sun_Exposed_Lower_leg"))
+get_single_nucleus_gex_summary(tissueSiteDetailIds = c(
+  "Breast_Mammary_Tissue",
+  "Skin_Sun_Exposed_Lower_leg"
+))
 }
 }
 \seealso{

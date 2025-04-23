@@ -5,17 +5,19 @@
 \title{Get Exons}
 \usage{
 get_exons(
-  gencodeId,
+  gencodeIds,
   gencodeVersion = NULL,
   genomeBuild = NULL,
   datasetId = "gtex_v8",
   page = 0,
-  itemsPerPage = 250
+  itemsPerPage = getOption("gtexr.itemsPerPage"),
+  .verbose = getOption("gtexr.verbose"),
+  .return_raw = FALSE
 )
 }
 \arguments{
-\item{gencodeId}{String. A Versioned GENCODE ID of a gene, e.g.
-"ENSG00000065613.9".}
+\item{gencodeIds}{A character vector of Versioned GENCODE IDs, e.g.
+c("ENSG00000132693.12", "ENSG00000203782.5").}
 
 \item{gencodeVersion}{String (default = "v26"). GENCODE annotation release.
 Either "v26" or "v19".}
@@ -28,10 +30,17 @@ data source and data release. Options: "gtex_v8", "gtex_snrnaseq_pilot".}
 
 \item{page}{Integer (default = 0).}
 
-\item{itemsPerPage}{Integer (default = 250).}
+\item{itemsPerPage}{Integer (default = 250). Set globally to maximum value
+100000 with \code{options(list(gtexr.itemsPerPage = 100000))}.}
+
+\item{.verbose}{Logical. If \code{TRUE} (default), print paging information. Set
+to \code{FALSE} globally with \code{options(list(gtexr.verbose = FALSE))}.}
+
+\item{.return_raw}{Logical. If \code{TRUE}, return the raw API JSON response.
+Default = \code{FALSE}}
 }
 \value{
-A tibble.
+A tibble. Or a list if \code{.return_raw = TRUE}.
 }
 \description{
 This service returns exons from all known transcripts of the given gene.
@@ -45,7 +54,7 @@ This service returns exons from all known transcripts of the given gene.
 }
 \examples{
 \dontrun{
-get_exons(gencodeId = "ENSG00000203782.5")
+get_exons(gencodeIds = c("ENSG00000132693.12", "ENSG00000203782.5"))
 }
 }
 \seealso{

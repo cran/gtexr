@@ -10,7 +10,9 @@ get_significant_single_tissue_eqtls(
   tissueSiteDetailIds = NULL,
   datasetId = "gtex_v8",
   page = 0,
-  itemsPerPage = 250
+  itemsPerPage = getOption("gtexr.itemsPerPage"),
+  .verbose = getOption("gtexr.verbose"),
+  .return_raw = FALSE
 )
 }
 \arguments{
@@ -28,10 +30,17 @@ data source and data release. Options: "gtex_v8", "gtex_snrnaseq_pilot".}
 
 \item{page}{Integer (default = 0).}
 
-\item{itemsPerPage}{Integer (default = 250).}
+\item{itemsPerPage}{Integer (default = 250). Set globally to maximum value
+100000 with \code{options(list(gtexr.itemsPerPage = 100000))}.}
+
+\item{.verbose}{Logical. If \code{TRUE} (default), print paging information. Set
+to \code{FALSE} globally with \code{options(list(gtexr.verbose = FALSE))}.}
+
+\item{.return_raw}{Logical. If \code{TRUE}, return the raw API JSON response.
+Default = \code{FALSE}}
 }
 \value{
-A tibble.
+A tibble. Or a list if \code{.return_raw = TRUE}.
 }
 \description{
 Find significant single tissue
@@ -55,18 +64,24 @@ IDs e.g. use "chr1_153209640_C_A_b38" instead of "rs1410858".
 \examples{
 \dontrun{
 # search by gene
-get_significant_single_tissue_eqtls(gencodeIds = c("ENSG00000132693.12",
-                                                  "ENSG00000203782.5"))
+get_significant_single_tissue_eqtls(gencodeIds = c(
+  "ENSG00000132693.12",
+  "ENSG00000203782.5"
+))
 
 # search by variant - must be variantId (not rsid)
 get_significant_single_tissue_eqtls(variantIds = "chr1_153209640_C_A_b38")
 
 # filter by gene/variant and tissue site - either `gencodeIds` or `variantIds`
 # should be supplied as a minimum
-get_significant_single_tissue_eqtls(gencodeIds = c("ENSG00000132693.12",
-                                                  "ENSG00000203782.5"),
-                                    variantIds = "chr1_153209640_C_A_b38",
-                                    tissueSiteDetailIds = "Whole_Blood")
+get_significant_single_tissue_eqtls(
+  gencodeIds = c(
+    "ENSG00000132693.12",
+    "ENSG00000203782.5"
+  ),
+  variantIds = "chr1_153209640_C_A_b38",
+  tissueSiteDetailIds = "Whole_Blood"
+)
 }
 }
 \seealso{

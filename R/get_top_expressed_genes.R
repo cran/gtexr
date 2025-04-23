@@ -11,7 +11,7 @@
 #'
 #' @inheritParams gtexr_arguments
 #'
-#' @return A tibble.
+#' @returns A tibble. Or a list if `.return_raw = TRUE`.
 #' @export
 #' @family Expression Data Endpoints
 #'
@@ -23,6 +23,8 @@ get_top_expressed_genes <- function(tissueSiteDetailId,
                                     datasetId = "gtex_v8",
                                     filterMtGene = TRUE,
                                     page = 0,
-                                    itemsPerPage = 250){
+                                    itemsPerPage = getOption("gtexr.itemsPerPage"),
+                                    .verbose = getOption("gtexr.verbose"),
+                                    .return_raw = FALSE) {
   gtex_query(endpoint = "expression/topExpressedGene")
 }

@@ -10,15 +10,16 @@ download(
   pathCategory = NULL,
   tissueSampleIds = NULL,
   sex = NULL,
-  sortBy = NULL,
-  sortDirection = NULL,
+  sortBy = "sampleId",
+  sortDirection = "asc",
   searchTerm = NULL,
   sampleIds = NULL,
   subjectIds = NULL,
   ageBrackets = NULL,
   hardyScales = NULL,
   hasExpressionData = NULL,
-  hasGenotype = NULL
+  hasGenotype = NULL,
+  .return_raw = FALSE
 )
 }
 \arguments{
@@ -71,9 +72,12 @@ causes", "Intermediate death", "Slow death".}
 \item{hasExpressionData}{Logical.}
 
 \item{hasGenotype}{Logical.}
+
+\item{.return_raw}{Logical. If \code{TRUE}, return the raw API JSON response.
+Default = \code{FALSE}}
 }
 \value{
-A tibble
+A tibble. Or a list if \code{.return_raw = TRUE}.
 }
 \description{
 \href{https://gtexportal.org/api/v2/redoc#tag/Biobank-Data-Endpoints/operation/download_api_v2_biobank_download_get}{GTEx Portal API documentation}

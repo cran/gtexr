@@ -4,13 +4,16 @@
 \alias{get_downloads_page_data}
 \title{Get Downloads Page Data}
 \usage{
-get_downloads_page_data(project_id = "adult-gtex")
+get_downloads_page_data(project_id, .return_raw = FALSE)
 }
 \arguments{
 \item{project_id}{String. Options: "gtex", "adult-gtex", "egtex".}
+
+\item{.return_raw}{Logical. If \code{TRUE}, return the raw API JSON response.
+Default = \code{FALSE}}
 }
 \value{
-A Tibble
+A tibble. Or a list if \code{.return_raw = TRUE}.
 }
 \description{
 Retrieves all the files belonging to the given \code{project_id} for
@@ -25,27 +28,27 @@ one project available: gtex". However, \code{project_id} values "adult-gtex" and
 }
 \examples{
 \dontrun{
- # "adult-gtex" (default `project_id` value) and "egtex" both return results
- get_downloads_page_data()
- egtex <- get_downloads_page_data("egtex")
- egtex
+# "adult-gtex" (default `project_id` value) and "egtex" both return results
+get_downloads_page_data("adult-gtex")
+egtex <- get_downloads_page_data("egtex")
+egtex
 
- # ..."gtex" does not
- get_downloads_page_data("gtex")
+# ..."gtex" does not
+get_downloads_page_data("gtex")
 
- # get details for whole blood methylation data, including download URL
- purrr::pluck(
-   egtex$children,
-   1,
-   "folders",
-   "Methylation - EPIC Array",
-   "children",
-   "folders",
-   "mQTLs",
-   "children",
-   "files",
-   "WholeBlood.mQTLs.regular.txt.gz"
- )
+# get details for whole blood methylation data, including download URL
+purrr::pluck(
+  egtex$children,
+  1,
+  "folders",
+  "Methylation - EPIC Array",
+  "children",
+  "folders",
+  "mQTLs",
+  "children",
+  "files",
+  "WholeBlood.mQTLs.regular.txt.gz"
+)
 }
 }
 \seealso{
@@ -57,7 +60,7 @@ Other Datasets Endpoints:
 \code{\link{get_functional_annotation}()},
 \code{\link{get_linkage_disequilibrium_by_variant_data}()},
 \code{\link{get_linkage_disequilibrium_data}()},
-\code{\link{get_sample_datasets_endpoints}()},
+\code{\link{get_sample_datasets}()},
 \code{\link{get_subject}()},
 \code{\link{get_tissue_site_detail}()},
 \code{\link{get_variant}()},

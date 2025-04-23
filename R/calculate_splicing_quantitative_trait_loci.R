@@ -5,7 +5,7 @@
 #'
 #' @inheritParams gtexr_arguments
 #'
-#' @return A tibble.
+#' @returns A tibble. Or a list if `.return_raw = TRUE`.
 #' @export
 #' @family Dynamic Association Endpoints
 #'
@@ -15,17 +15,23 @@
 #' calculate_splicing_quantitative_trait_loci(
 #'   tissueSiteDetailId = "Whole_Blood",
 #'   phenotypeId = "chr1:15947:16607:clu_40980:ENSG00000227232.5",
-#'   variantId = "chr1_14677_G_A_b38")
+#'   variantId = "chr1_14677_G_A_b38"
+#' )
 #' }
 calculate_splicing_quantitative_trait_loci <- function(tissueSiteDetailId,
                                                        phenotypeId,
                                                        variantId,
-                                                       datasetId = "gtex_v8") {
-  result <- gtex_query("association/dynsqtl", return_raw = TRUE)
-  result$data <- list(tibble::tibble(data = as.numeric(result$data)))
-  result$genotypes <- list(tibble::tibble(genotypes = as.integer(result$genotypes)))
+                                                       datasetId = "gtex_v8",
+                                                       .return_raw = FALSE) {
+  gtex_query(
+    "association/dynsqtl",
+    process_calculate_splicing_quantitative_trait_loci_resp_json
+  )
+}
 
-  result <- tibble::as_tibble(result)
+process_calculate_splicing_quantitative_trait_loci_resp_json <- function(resp_json) {
+  resp_json$data <- list(tibble::tibble(data = as.numeric(resp_json$data)))
+  resp_json$genotypes <- list(tibble::tibble(genotypes = as.integer(resp_json$genotypes)))
 
-  return(result)
+  return(tibble::as_tibble(resp_json))
 }

@@ -4,10 +4,14 @@
 \alias{get_file_list}
 \title{Get File List}
 \usage{
-get_file_list()
+get_file_list(.return_raw = FALSE)
+}
+\arguments{
+\item{.return_raw}{Logical. If \code{TRUE}, return the raw API JSON response.
+Default = \code{FALSE}}
 }
 \value{
-A tibble
+A tibble. Or a list if \code{.return_raw = TRUE}.
 }
 \description{
 Get all the files in GTEx dataset for Download page
@@ -25,8 +29,8 @@ get_file_list()
 
 # Get "GTEx Analysis V9" file list
 gtex_v9_files <- get_file_list() |>
-                   dplyr::filter(name == "GTEx Analysis V9") |>
-                   dplyr::pull(filesets)
+  dplyr::filter(name == "GTEx Analysis V9") |>
+  dplyr::pull(filesets)
 
 # "GTEx Analysis V9" filesets
 names(gtex_v9_files[[1]])
@@ -44,7 +48,7 @@ Other Datasets Endpoints:
 \code{\link{get_functional_annotation}()},
 \code{\link{get_linkage_disequilibrium_by_variant_data}()},
 \code{\link{get_linkage_disequilibrium_data}()},
-\code{\link{get_sample_datasets_endpoints}()},
+\code{\link{get_sample_datasets}()},
 \code{\link{get_subject}()},
 \code{\link{get_tissue_site_detail}()},
 \code{\link{get_variant}()},

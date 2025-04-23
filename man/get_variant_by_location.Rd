@@ -10,8 +10,11 @@ get_variant_by_location(
   chromosome,
   sortBy = "pos",
   sortDirection = "asc",
+  datasetId = "gtex_v8",
   page = 0,
-  itemsPerPage = 250
+  itemsPerPage = getOption("gtexr.itemsPerPage"),
+  .verbose = getOption("gtexr.verbose"),
+  .return_raw = FALSE
 )
 }
 \arguments{
@@ -30,12 +33,22 @@ get_variant_by_location(
 
 \item{sortDirection}{String. Options: "asc", "desc". Default = "asc".}
 
+\item{datasetId}{String. Unique identifier of a dataset. Usually includes a
+data source and data release. Options: "gtex_v8", "gtex_snrnaseq_pilot".}
+
 \item{page}{Integer (default = 0).}
 
-\item{itemsPerPage}{Integer (default = 250).}
+\item{itemsPerPage}{Integer (default = 250). Set globally to maximum value
+100000 with \code{options(list(gtexr.itemsPerPage = 100000))}.}
+
+\item{.verbose}{Logical. If \code{TRUE} (default), print paging information. Set
+to \code{FALSE} globally with \code{options(list(gtexr.verbose = FALSE))}.}
+
+\item{.return_raw}{Logical. If \code{TRUE}, return the raw API JSON response.
+Default = \code{FALSE}}
 }
 \value{
-A tibble.
+A tibble. Or a list if \code{.return_raw = TRUE}.
 }
 \description{
 This service allows the user to query information about variants
@@ -44,9 +57,11 @@ on a certain chromosome at a certain location.
 \href{https://gtexportal.org/api/v2/redoc#tag/Datasets-Endpoints/operation/get_variant_by_location_api_v2_dataset_variantByLocation_get}{GTEx Portal API documentation}
 }
 \examples{
-get_variant_by_location(start = 153209600,
-                        end = 153209700,
-                        chromosome = "chr1")
+get_variant_by_location(
+  start = 153209600,
+  end = 153209700,
+  chromosome = "chr1"
+)
 }
 \seealso{
 Other Datasets Endpoints: 
@@ -58,7 +73,7 @@ Other Datasets Endpoints:
 \code{\link{get_functional_annotation}()},
 \code{\link{get_linkage_disequilibrium_by_variant_data}()},
 \code{\link{get_linkage_disequilibrium_data}()},
-\code{\link{get_sample_datasets_endpoints}()},
+\code{\link{get_sample_datasets}()},
 \code{\link{get_subject}()},
 \code{\link{get_tissue_site_detail}()},
 \code{\link{get_variant}()}

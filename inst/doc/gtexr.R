@@ -1,7 +1,7 @@
 ## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>", 
+  comment = "#>",
   eval = (Sys.getenv("RUN_VIGNETTES") != "")
 )
 
@@ -9,6 +9,16 @@ knitr::opts_chunk$set(
 library(gtexr)
 library(dplyr)
 library(purrr)
+
+## -----------------------------------------------------------------------------
+get_eqtl_genes("Whole_Blood")
+
+## -----------------------------------------------------------------------------
+# to retrieve the first 3 pages, with default setting of 250 items per page
+1:3 |>
+  map(\(page) get_eqtl_genes("Whole_Blood", page = page, .verbose = FALSE) |>
+        suppressWarnings()) |>
+  bind_rows()
 
 ## -----------------------------------------------------------------------------
 get_variant(snpId = "rs1410858") |>
@@ -58,7 +68,6 @@ variants_of_interest |>
     )
   ) |>
   bind_rows(.id = "rsid") |>
-  
   # optionally, reformat output - first extract genomic coordinates and alleles
   tidyr::separate(
     col = "variantId",
@@ -71,14 +80,12 @@ variants_of_interest |>
     ),
     sep = "_"
   ) |>
-  
   # ...then ascertain alternative_allele frequency
   mutate(
     alt_allele_count = (2 * homoAltCount) + hetCount,
-    total_allele_count = 2 * (homoAltCount + hetCount +  homoRefCount),
+    total_allele_count = 2 * (homoAltCount + hetCount + homoRefCount),
     alternative_allele_frequency = alt_allele_count / total_allele_count
   ) |>
-  
   select(
     rsid,
     beta = nes,

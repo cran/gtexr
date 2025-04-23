@@ -8,16 +8,19 @@
 #'
 #' @inheritParams gtexr_arguments
 #'
-#' @return A tibble
+#' @returns A tibble. Or a list if `.return_raw = TRUE`.
 #' @export
 #' @family Datasets Endpoints
 #'
 #' @examples
 #' \dontrun{
-#'   get_full_get_collapsed_gene_model_exon(gencodeId = "ENSG00000203782.5")
+#' get_full_get_collapsed_gene_model_exon(gencodeId = "ENSG00000203782.5")
 #' }
 get_full_get_collapsed_gene_model_exon <- function(gencodeId,
+                                                   datasetId = "gtex_v8",
                                                    page = 0,
-                                                   itemsPerPage = 250){
+                                                   itemsPerPage = getOption("gtexr.itemsPerPage"),
+                                                   .verbose = getOption("gtexr.verbose"),
+                                                   .return_raw = FALSE) {
   gtex_query(endpoint = "dataset/fullCollapsedGeneModelExon")
 }

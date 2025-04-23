@@ -8,10 +8,12 @@ get_subject(
   datasetId = "gtex_v8",
   sex = NULL,
   ageBrackets = NULL,
-  hardyScales = NULL,
+  hardyScale = NULL,
   subjectIds = NULL,
   page = 0,
-  itemsPerPage = 250
+  itemsPerPage = getOption("gtexr.itemsPerPage"),
+  .verbose = getOption("gtexr.verbose"),
+  .return_raw = FALSE
 )
 }
 \arguments{
@@ -23,7 +25,7 @@ data source and data release. Options: "gtex_v8", "gtex_snrnaseq_pilot".}
 \item{ageBrackets}{The age bracket(s) of the donors of interest. Options:
 "20-29", "30-39", "40-49", "50-59", "60-69", "70-79".}
 
-\item{hardyScales}{Character vector. A list of Hardy Scale(s) of interest.
+\item{hardyScale}{String A Hardy Scale of interest.
 Options: "Ventilator case", "Fast death - violent", "Fast death - natural
 causes", "Intermediate death", "Slow death".}
 
@@ -31,10 +33,17 @@ causes", "Intermediate death", "Slow death".}
 
 \item{page}{Integer (default = 0).}
 
-\item{itemsPerPage}{Integer (default = 250).}
+\item{itemsPerPage}{Integer (default = 250). Set globally to maximum value
+100000 with \code{options(list(gtexr.itemsPerPage = 100000))}.}
+
+\item{.verbose}{Logical. If \code{TRUE} (default), print paging information. Set
+to \code{FALSE} globally with \code{options(list(gtexr.verbose = FALSE))}.}
+
+\item{.return_raw}{Logical. If \code{TRUE}, return the raw API JSON response.
+Default = \code{FALSE}}
 }
 \value{
-A Tibble
+A tibble. Or a list if \code{.return_raw = TRUE}.
 }
 \description{
 This service returns information of subjects used in analyses
@@ -42,11 +51,11 @@ from all datasets. Results may be filtered by dataset ID, subject ID, sex,
 age bracket or Hardy Scale. By default, this service queries the latest GTEx
 release.
 
-\href{https://gtexportal.org/api/v2/redoc#tag/Datasets-Endpoints/operation/get_tissue_site_detail_api_v2_dataset_tissueSiteDetail_get}{GTEx Portal API documentation}
+\href{https://gtexportal.org/api/v2/redoc#tag/Datasets-Endpoints/operation/get_subject_api_v2_dataset_subject_get}{GTEx Portal API documentation}
 }
 \examples{
 \dontrun{
-  get_subject()
+get_subject()
 }
 }
 \seealso{
@@ -59,7 +68,7 @@ Other Datasets Endpoints:
 \code{\link{get_functional_annotation}()},
 \code{\link{get_linkage_disequilibrium_by_variant_data}()},
 \code{\link{get_linkage_disequilibrium_data}()},
-\code{\link{get_sample_datasets_endpoints}()},
+\code{\link{get_sample_datasets}()},
 \code{\link{get_tissue_site_detail}()},
 \code{\link{get_variant}()},
 \code{\link{get_variant_by_location}()}

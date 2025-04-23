@@ -10,7 +10,9 @@ get_functional_annotation(
   start,
   end,
   page = 0,
-  itemsPerPage = 250
+  itemsPerPage = getOption("gtexr.itemsPerPage"),
+  .verbose = getOption("gtexr.verbose"),
+  .return_raw = FALSE
 )
 }
 \arguments{
@@ -28,10 +30,17 @@ data source and data release. Options: "gtex_v8", "gtex_snrnaseq_pilot".}
 
 \item{page}{Integer (default = 0).}
 
-\item{itemsPerPage}{Integer (default = 250).}
+\item{itemsPerPage}{Integer (default = 250). Set globally to maximum value
+100000 with \code{options(list(gtexr.itemsPerPage = 100000))}.}
+
+\item{.verbose}{Logical. If \code{TRUE} (default), print paging information. Set
+to \code{FALSE} globally with \code{options(list(gtexr.verbose = FALSE))}.}
+
+\item{.return_raw}{Logical. If \code{TRUE}, return the raw API JSON response.
+Default = \code{FALSE}}
 }
 \value{
-A tibble
+A tibble. Or a list if \code{.return_raw = TRUE}.
 }
 \description{
 This endpoint retrieves the functional annotation of a certain
@@ -41,7 +50,7 @@ chromosome location. Default to most recent dataset release.
 }
 \examples{
 \dontrun{
-  get_functional_annotation(chromosome = "chr1", start = 192168000, end = 192169000)
+get_functional_annotation(chromosome = "chr1", start = 192168000, end = 192169000)
 }
 }
 \seealso{
@@ -53,7 +62,7 @@ Other Datasets Endpoints:
 \code{\link{get_full_get_collapsed_gene_model_exon}()},
 \code{\link{get_linkage_disequilibrium_by_variant_data}()},
 \code{\link{get_linkage_disequilibrium_data}()},
-\code{\link{get_sample_datasets_endpoints}()},
+\code{\link{get_sample_datasets}()},
 \code{\link{get_subject}()},
 \code{\link{get_tissue_site_detail}()},
 \code{\link{get_variant}()},

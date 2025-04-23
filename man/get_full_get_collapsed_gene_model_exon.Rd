@@ -4,18 +4,35 @@
 \alias{get_full_get_collapsed_gene_model_exon}
 \title{Get Full Get Collapsed Gene Model Exon}
 \usage{
-get_full_get_collapsed_gene_model_exon(gencodeId, page = 0, itemsPerPage = 250)
+get_full_get_collapsed_gene_model_exon(
+  gencodeId,
+  datasetId = "gtex_v8",
+  page = 0,
+  itemsPerPage = getOption("gtexr.itemsPerPage"),
+  .verbose = getOption("gtexr.verbose"),
+  .return_raw = FALSE
+)
 }
 \arguments{
 \item{gencodeId}{String. A Versioned GENCODE ID of a gene, e.g.
 "ENSG00000065613.9".}
 
+\item{datasetId}{String. Unique identifier of a dataset. Usually includes a
+data source and data release. Options: "gtex_v8", "gtex_snrnaseq_pilot".}
+
 \item{page}{Integer (default = 0).}
 
-\item{itemsPerPage}{Integer (default = 250).}
+\item{itemsPerPage}{Integer (default = 250). Set globally to maximum value
+100000 with \code{options(list(gtexr.itemsPerPage = 100000))}.}
+
+\item{.verbose}{Logical. If \code{TRUE} (default), print paging information. Set
+to \code{FALSE} globally with \code{options(list(gtexr.verbose = FALSE))}.}
+
+\item{.return_raw}{Logical. If \code{TRUE}, return the raw API JSON response.
+Default = \code{FALSE}}
 }
 \value{
-A tibble
+A tibble. Or a list if \code{.return_raw = TRUE}.
 }
 \description{
 This service allows the user to query the full Collapsed Gene
@@ -25,7 +42,7 @@ Model Exon of a specific gene by gencode ID
 }
 \examples{
 \dontrun{
-  get_full_get_collapsed_gene_model_exon(gencodeId = "ENSG00000203782.5")
+get_full_get_collapsed_gene_model_exon(gencodeId = "ENSG00000203782.5")
 }
 }
 \seealso{
@@ -37,7 +54,7 @@ Other Datasets Endpoints:
 \code{\link{get_functional_annotation}()},
 \code{\link{get_linkage_disequilibrium_by_variant_data}()},
 \code{\link{get_linkage_disequilibrium_data}()},
-\code{\link{get_sample_datasets_endpoints}()},
+\code{\link{get_sample_datasets}()},
 \code{\link{get_subject}()},
 \code{\link{get_tissue_site_detail}()},
 \code{\link{get_variant}()},

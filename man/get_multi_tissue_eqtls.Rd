@@ -5,16 +5,18 @@
 \title{Get Multi Tissue Eqtls}
 \usage{
 get_multi_tissue_eqtls(
-  gencodeIds,
+  gencodeId,
   variantId = NULL,
   datasetId = "gtex_v8",
   page = 0,
-  itemsPerPage = 250
+  itemsPerPage = getOption("gtexr.itemsPerPage"),
+  .verbose = getOption("gtexr.verbose"),
+  .return_raw = FALSE
 )
 }
 \arguments{
-\item{gencodeIds}{A character vector of Versioned GENCODE IDs, e.g.
-c("ENSG00000132693.12", "ENSG00000203782.5").}
+\item{gencodeId}{String. A Versioned GENCODE ID of a gene, e.g.
+"ENSG00000065613.9".}
 
 \item{variantId}{String. A gtex variant ID.}
 
@@ -23,10 +25,17 @@ data source and data release. Options: "gtex_v8", "gtex_snrnaseq_pilot".}
 
 \item{page}{Integer (default = 0).}
 
-\item{itemsPerPage}{Integer (default = 250).}
+\item{itemsPerPage}{Integer (default = 250). Set globally to maximum value
+100000 with \code{options(list(gtexr.itemsPerPage = 100000))}.}
+
+\item{.verbose}{Logical. If \code{TRUE} (default), print paging information. Set
+to \code{FALSE} globally with \code{options(list(gtexr.verbose = FALSE))}.}
+
+\item{.return_raw}{Logical. If \code{TRUE}, return the raw API JSON response.
+Default = \code{FALSE}}
 }
 \value{
-A tibble.
+A tibble. Or a list if \code{.return_raw = TRUE}.
 }
 \description{
 Find multi-tissue eQTL \code{Metasoft} results.
@@ -46,8 +55,13 @@ By default, the service queries the latest GTEx release. The retrieved data is s
 \examples{
 \dontrun{
 # search by gene
-get_multi_tissue_eqtls(gencodeId = c("ENSG00000132693.12",
-                                     "ENSG00000203782.5"))
+get_multi_tissue_eqtls(gencodeId = "ENSG00000132693.12")
+
+# note that 'tissues' is a list-column
+x <- get_multi_tissue_eqtls(gencodeId = "ENSG00000132693.12",
+                            variantId = "chr1_159476920_T_C_b38")
+
+x$tissues[[1]]
 }
 }
 \seealso{

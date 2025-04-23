@@ -346,7 +346,7 @@ Genotype-Tissue Expression Portal. The gtexr package wraps this API,
 providing R functions that correspond to each <a href="https://gtexportal.org/api/v2/redoc">API endpoint</a>:</p>
 <ul>
 <li>R function names mirror those of their corresponding endpoint,
-converted to lower case with spaces replaced with underscores e.g. the R
+converted to lower case with spaces replaced with underscores<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> e.g. the R
 function for <a href="https://gtexportal.org/api/v2/redoc#tag/GTEx-Portal-API-Info/operation/get_service_info_api_v2__get">“Get
 Service Info”</a> is <code>get_service_info()</code>.</li>
 <li>Query parameters are similarly mirrored by function arguments
@@ -359,111 +359,182 @@ indicate this e.g. for endpoint <a href="https://gtexportal.org/api/v2/redoc#ta
 Eqtl Genes”</a> the query parameter ‘tissueSiteDetailId’ is pluralised
 to argument name <code>tissueSiteDetailIds</code> in
 <code>get_eqtl_genes()</code>.</li>
-<li>Default values for arguments mirror those for the API</li>
+<li>Default values for arguments mirror those for the API.</li>
 <li>The documentation for each function includes at least one working
 example e.g. <code>?get_eqtl_genes</code> provides example valid values
 for the required argument <code>tissueSiteDetailIds</code>.</li>
-<li>All functions return a <code>tibble::tibble</code>.</li>
+<li>All functions return a <code>tibble::tibble</code> by default.
+Alternatively, the raw JSON from an API call may be retrieved by setting
+argument <code>.return_raw</code> to <code>TRUE</code>
+e.g. <code>get_service_info(.return_raw = TRUE)</code>.</li>
 </ul>
 <div id="shiny-app" class="section level2">
 <h2>Shiny app</h2>
 <p>Users can try out all functions interatively with the ⭐<a href="https://7hocgq-rmgpanw.shinyapps.io/gtexr/">gtexr shiny app</a>⭐,
 which pre-populates query parameters with those for the first working
-example from each function’s documentation.</p>
+example from each function’s documentation. To run the app locally:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>shiny<span class="sc">::</span><span class="fu">runApp</span>(<span class="fu">system.file</span>(<span class="st">&quot;app&quot;</span>, <span class="at">package =</span> <span class="st">&quot;gtexr&quot;</span>))</span></code></pre></div>
+</div>
+<div id="paginated-responses" class="section level2">
+<h2>Paginated responses</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(gtexr)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="fu">library</span>(purrr)</span></code></pre></div>
+<p>Many API endpoints return only the first 250 available items by
+default. A warning is raised if the number of available items exceeds
+the selected maximum page size e.g.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">get_eqtl_genes</span>(<span class="st">&quot;Whole_Blood&quot;</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co">#&gt; Warning: ! Total number of items (12360) exceeds the selected maximum page size (250).</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt; ✖ 12110 items were not retrieved.</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; ℹ To retrieve all available items, increase `itemsPerPage`, ensuring you reuse</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt;   your original query parameters e.g.</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt;   `get_eqtl_genes(&lt;your_existing_parameters&gt;, itemsPerPage = 100000)`</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; ℹ Alternatively, adjust global &quot;gtexr.itemsPerPage&quot; setting e.g.</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt;   `options(list(gtexr.itemsPerPage = 100000))`</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; ── Paging info ─────────────────────────────────────────────────────────────────</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; • numberOfPages = 50</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; • page = 0</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt; • maxItemsPerPage = 250</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt; • totalNumberOfItems = 12360</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; # A tibble: 250 × 10</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt;    tissueSiteDetailId ontologyId  datasetId empiricalPValue gencodeId geneSymbol</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt;    &lt;chr&gt;              &lt;chr&gt;       &lt;chr&gt;               &lt;dbl&gt; &lt;chr&gt;     &lt;chr&gt;     </span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt;  1 Whole_Blood        UBERON:001… gtex_v8          1.05e- 9 ENSG0000… WASH7P    </span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt;  2 Whole_Blood        UBERON:001… gtex_v8          1.06e-25 ENSG0000… RP11-34P1…</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt;  3 Whole_Blood        UBERON:001… gtex_v8          6.31e- 2 ENSG0000… CICP27    </span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt;  4 Whole_Blood        UBERON:001… gtex_v8          8.71e- 9 ENSG0000… RP11-34P1…</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt;  5 Whole_Blood        UBERON:001… gtex_v8          6.01e-20 ENSG0000… RP11-34P1…</span></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co">#&gt;  6 Whole_Blood        UBERON:001… gtex_v8          6.96e- 9 ENSG0000… RP11-34P1…</span></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#&gt;  7 Whole_Blood        UBERON:001… gtex_v8          3.10e- 4 ENSG0000… RP11-34P1…</span></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="co">#&gt;  8 Whole_Blood        UBERON:001… gtex_v8          1.92e- 3 ENSG0000… ABC7-4304…</span></span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="co">#&gt;  9 Whole_Blood        UBERON:001… gtex_v8          1.58e- 3 ENSG0000… RP11-34P1…</span></span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a><span class="co">#&gt; 10 Whole_Blood        UBERON:001… gtex_v8          7.82e- 2 ENSG0000… AP006222.2</span></span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="co">#&gt; # ℹ 240 more rows</span></span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a><span class="co">#&gt; # ℹ 4 more variables: log2AllelicFoldChange &lt;dbl&gt;, pValue &lt;dbl&gt;,</span></span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a><span class="co">#&gt; #   pValueThreshold &lt;dbl&gt;, qValue &lt;dbl&gt;</span></span></code></pre></div>
+<p>For most cases, the simplest solution is to increase the value of
+<code>itemsPerPage</code>
+e.g. <code>get_eqtl_genes(&quot;Whole_Blood&quot;, itemsPerPage = 100000)</code>.
+This limit can be set globally by setting the “gtexr.itemsPerPage”
+option with <code>options(list(gtexr.itemsPerPage = 100000))</code>.</p>
+<p>Alternatively, multiple pages can be retrieved sequentially e.g.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># to retrieve the first 3 pages, with default setting of 250 items per page</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="dv">1</span><span class="sc">:</span><span class="dv">3</span> <span class="sc">|&gt;</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="fu">map</span>(\(page) <span class="fu">get_eqtl_genes</span>(<span class="st">&quot;Whole_Blood&quot;</span>, <span class="at">page =</span> page, <span class="at">.verbose =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>        <span class="fu">suppressWarnings</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="fu">bind_rows</span>()</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; # A tibble: 750 × 10</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt;    tissueSiteDetailId ontologyId  datasetId empiricalPValue gencodeId geneSymbol</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt;    &lt;chr&gt;              &lt;chr&gt;       &lt;chr&gt;               &lt;dbl&gt; &lt;chr&gt;     &lt;chr&gt;     </span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt;  1 Whole_Blood        UBERON:001… gtex_v8          5.44e- 2 ENSG0000… ARID1A    </span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt;  2 Whole_Blood        UBERON:001… gtex_v8          2.60e-21 ENSG0000… PIGV      </span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt;  3 Whole_Blood        UBERON:001… gtex_v8          3.46e-17 ENSG0000… ZDHHC18   </span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt;  4 Whole_Blood        UBERON:001… gtex_v8          8.02e- 4 ENSG0000… GPN2      </span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt;  5 Whole_Blood        UBERON:001… gtex_v8          3.48e- 8 ENSG0000… TRNP1     </span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt;  6 Whole_Blood        UBERON:001… gtex_v8          2.15e- 3 ENSG0000… SLC9A1    </span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt;  7 Whole_Blood        UBERON:001… gtex_v8          1.09e- 7 ENSG0000… WDTC1     </span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt;  8 Whole_Blood        UBERON:001… gtex_v8          5.17e- 4 ENSG0000… RP11-4K3_…</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt;  9 Whole_Blood        UBERON:001… gtex_v8          5.98e- 4 ENSG0000… TMEM222   </span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt; 10 Whole_Blood        UBERON:001… gtex_v8          7.62e- 6 ENSG0000… SYTL1     </span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co">#&gt; # ℹ 740 more rows</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="co">#&gt; # ℹ 4 more variables: log2AllelicFoldChange &lt;dbl&gt;, pValue &lt;dbl&gt;,</span></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="co">#&gt; #   pValueThreshold &lt;dbl&gt;, qValue &lt;dbl&gt;</span></span></code></pre></div>
+<p>Note that paging information is printed to the R console by default.
+Set argument <code>.verbose</code> to <code>FALSE</code> to silence
+these messages, or disable globally with
+<code>options(list(gtexr.verbose = FALSE))</code>.</p>
 </div>
 <div id="examples" class="section level2">
 <h2>Examples</h2>
 <p>The rest of this vignette outlines some example applications of
 gtexr.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(gtexr)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(purrr)</span></code></pre></div>
 <div id="get-build-37-coordinates-for-a-variant" class="section level3">
 <h3>Get build 37 coordinates for a variant</h3>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">get_variant</span>(<span class="at">snpId =</span> <span class="st">&quot;rs1410858&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">separate</span>(</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>    <span class="at">col =</span> b37VariantId,</span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>    <span class="at">into =</span> <span class="fu">c</span>(</span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>      <span class="st">&quot;chromosome&quot;</span>,</span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>      <span class="st">&quot;position&quot;</span>,</span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>      <span class="st">&quot;reference_allele&quot;</span>,</span>
-<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>      <span class="st">&quot;alternative_allele&quot;</span>,</span>
-<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>      <span class="st">&quot;genome_build&quot;</span></span>
-<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>    ),</span>
-<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>    <span class="at">sep =</span> <span class="st">&quot;_&quot;</span>,</span>
-<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>    <span class="at">remove =</span> <span class="cn">FALSE</span></span>
-<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>  <span class="fu">select</span>(snpId<span class="sc">:</span>genome_build)</span>
-<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#&gt; ── Paging info ─────────────────────────────────────────────────────────────────</span></span>
-<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt; • numberOfPages = 1</span></span>
-<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="co">#&gt; • page = 0</span></span>
-<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="co">#&gt; • maxItemsPerPage = 250</span></span>
-<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="co">#&gt; • totalNumberOfItems = 1</span></span>
-<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="co">#&gt; # A tibble: 1 × 7</span></span>
-<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="co">#&gt;   snpId     b37VariantId chromosome position reference_allele alternative_allele</span></span>
-<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;     &lt;chr&gt;        &lt;chr&gt;      &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;             </span></span>
-<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a><span class="co">#&gt; 1 rs1410858 1_153182116… 1          1531821… C                A                 </span></span>
-<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a><span class="co">#&gt; # ℹ 1 more variable: genome_build &lt;chr&gt;</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">get_variant</span>(<span class="at">snpId =</span> <span class="st">&quot;rs1410858&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">separate</span>(</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>    <span class="at">col =</span> b37VariantId,</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>    <span class="at">into =</span> <span class="fu">c</span>(</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>      <span class="st">&quot;chromosome&quot;</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>      <span class="st">&quot;position&quot;</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>      <span class="st">&quot;reference_allele&quot;</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>      <span class="st">&quot;alternative_allele&quot;</span>,</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>      <span class="st">&quot;genome_build&quot;</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>    ),</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>    <span class="at">sep =</span> <span class="st">&quot;_&quot;</span>,</span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>    <span class="at">remove =</span> <span class="cn">FALSE</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>  <span class="fu">select</span>(snpId<span class="sc">:</span>genome_build)</span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt; ── Paging info ─────────────────────────────────────────────────────────────────</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt; • numberOfPages = 1</span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co">#&gt; • page = 0</span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co">#&gt; • maxItemsPerPage = 250</span></span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="co">#&gt; • totalNumberOfItems = 1</span></span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="co">#&gt; # A tibble: 1 × 7</span></span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a><span class="co">#&gt;   snpId     b37VariantId chromosome position reference_allele alternative_allele</span></span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;     &lt;chr&gt;        &lt;chr&gt;      &lt;chr&gt;    &lt;chr&gt;            &lt;chr&gt;             </span></span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a><span class="co">#&gt; 1 rs1410858 1_153182116… 1          1531821… C                A                 </span></span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a><span class="co">#&gt; # ℹ 1 more variable: genome_build &lt;chr&gt;</span></span></code></pre></div>
 </div>
 <div id="convert-gene-symbol-to-versioned-gencode-id" class="section level3">
 <h3>Convert gene symbol to versioned GENCODE ID</h3>
 <p>Use <code>get_gene()</code> or <code>get_genes()</code></p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">get_genes</span>(<span class="st">&quot;CRP&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  <span class="fu">select</span>(geneSymbol, gencodeId)</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; ── Paging info ─────────────────────────────────────────────────────────────────</span></span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; • numberOfPages = 1</span></span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; • page = 0</span></span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; • maxItemsPerPage = 250</span></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; • totalNumberOfItems = 1</span></span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; # A tibble: 1 × 2</span></span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt;   geneSymbol gencodeId         </span></span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;      &lt;chr&gt;             </span></span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; 1 CRP        ENSG00000132693.12</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">get_genes</span>(<span class="st">&quot;CRP&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="fu">select</span>(geneSymbol, gencodeId)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt; ── Paging info ─────────────────────────────────────────────────────────────────</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt; • numberOfPages = 1</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt; • page = 0</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; • maxItemsPerPage = 250</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; • totalNumberOfItems = 1</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt; # A tibble: 1 × 2</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt;   geneSymbol gencodeId         </span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;      &lt;chr&gt;             </span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt; 1 CRP        ENSG00000132693.12</span></span></code></pre></div>
 </div>
 <div id="convert-rsid-to-gtex-variant-id" class="section level3">
 <h3>Convert rsID to GTEx variant ID</h3>
 <p>Use <code>get_variant()</code></p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">get_variant</span>(<span class="at">snpId =</span> <span class="st">&quot;rs1410858&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="fu">select</span>(snpId, variantId)</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt; ── Paging info ─────────────────────────────────────────────────────────────────</span></span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt; • numberOfPages = 1</span></span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; • page = 0</span></span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; • maxItemsPerPage = 250</span></span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; • totalNumberOfItems = 1</span></span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; # A tibble: 1 × 2</span></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt;   snpId     variantId             </span></span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;     &lt;chr&gt;                 </span></span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; 1 rs1410858 chr1_153209640_C_A_b38</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">get_variant</span>(<span class="at">snpId =</span> <span class="st">&quot;rs1410858&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="fu">select</span>(snpId, variantId)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt; ── Paging info ─────────────────────────────────────────────────────────────────</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co">#&gt; • numberOfPages = 1</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt; • page = 0</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt; • maxItemsPerPage = 250</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; • totalNumberOfItems = 1</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt; # A tibble: 1 × 2</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt;   snpId     variantId             </span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;     &lt;chr&gt;                 </span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; 1 rs1410858 chr1_153209640_C_A_b38</span></span></code></pre></div>
 </div>
 <div id="for-a-gene-of-interest-which-tissues-have-significant-cis-eqtls" class="section level3">
 <h3>For a gene of interest, which tissues have significant
 <em>cis</em>-eQTLs?</h3>
 <p>Use <code>get_significant_single_tissue_eqtls()</code> (note this
 requires versioned GENCODE IDs)</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>gene_symbol_of_interest <span class="ot">&lt;-</span> <span class="st">&quot;CRP&quot;</span></span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>gene_gencodeId_of_interest <span class="ot">&lt;-</span> <span class="fu">get_genes</span>(gene_symbol_of_interest) <span class="sc">|&gt;</span></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="fu">pull</span>(gencodeId) <span class="sc">|&gt;</span></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  <span class="fu">suppressMessages</span>()</span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a></span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>gene_gencodeId_of_interest <span class="sc">|&gt;</span></span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  <span class="fu">get_significant_single_tissue_eqtls</span>() <span class="sc">|&gt;</span></span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>  <span class="fu">distinct</span>(geneSymbol, gencodeId, tissueSiteDetailId)</span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt; ── Paging info ─────────────────────────────────────────────────────────────────</span></span>
-<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt; • numberOfPages = 1</span></span>
-<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt; • page = 0</span></span>
-<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; • maxItemsPerPage = 250</span></span>
-<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt; • totalNumberOfItems = 93</span></span>
-<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt; # A tibble: 3 × 3</span></span>
-<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt;   geneSymbol gencodeId          tissueSiteDetailId                 </span></span>
-<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;      &lt;chr&gt;              &lt;chr&gt;                              </span></span>
-<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co">#&gt; 1 CRP        ENSG00000132693.12 Thyroid                            </span></span>
-<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="co">#&gt; 2 CRP        ENSG00000132693.12 Esophagus_Gastroesophageal_Junction</span></span>
-<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="co">#&gt; 3 CRP        ENSG00000132693.12 Muscle_Skeletal</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>gene_symbol_of_interest <span class="ot">&lt;-</span> <span class="st">&quot;CRP&quot;</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>gene_gencodeId_of_interest <span class="ot">&lt;-</span> <span class="fu">get_genes</span>(gene_symbol_of_interest) <span class="sc">|&gt;</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="fu">pull</span>(gencodeId) <span class="sc">|&gt;</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="fu">suppressMessages</span>()</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>gene_gencodeId_of_interest <span class="sc">|&gt;</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>  <span class="fu">get_significant_single_tissue_eqtls</span>() <span class="sc">|&gt;</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>  <span class="fu">distinct</span>(geneSymbol, gencodeId, tissueSiteDetailId)</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt; ── Paging info ─────────────────────────────────────────────────────────────────</span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt; • numberOfPages = 1</span></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#&gt; • page = 0</span></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#&gt; • maxItemsPerPage = 250</span></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#&gt; • totalNumberOfItems = 93</span></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co">#&gt; # A tibble: 3 × 3</span></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="co">#&gt;   geneSymbol gencodeId          tissueSiteDetailId                 </span></span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;      &lt;chr&gt;              &lt;chr&gt;                              </span></span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a><span class="co">#&gt; 1 CRP        ENSG00000132693.12 Thyroid                            </span></span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a><span class="co">#&gt; 2 CRP        ENSG00000132693.12 Esophagus_Gastroesophageal_Junction</span></span>
+<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a><span class="co">#&gt; 3 CRP        ENSG00000132693.12 Muscle_Skeletal</span></span></code></pre></div>
 </div>
 <div id="get-data-for-non-eqtl-variants" class="section level3">
 <h3>Get data for non-eQTL variants</h3>
@@ -471,59 +542,66 @@ requires versioned GENCODE IDs)</p>
 variants which may or may not be significant eQTLs. Use
 <code>calculate_expression_quantitative_trait_loci()</code> with
 <code>purrr::map()</code> to retrieve data for multiple variants</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>variants_of_interest <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;rs12119111&quot;</span>, <span class="st">&quot;rs6605071&quot;</span>, <span class="st">&quot;rs1053870&quot;</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>variants_of_interest <span class="sc">|&gt;</span></span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="fu">set_names</span>() <span class="sc">|&gt;</span></span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="fu">map</span>(</span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>    \(x) <span class="fu">calculate_expression_quantitative_trait_loci</span>(</span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>      <span class="at">tissueSiteDetailId =</span> <span class="st">&quot;Liver&quot;</span>,</span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>      <span class="at">gencodeId =</span> <span class="st">&quot;ENSG00000237973.1&quot;</span>,</span>
-<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>      <span class="at">variantId =</span> x</span>
-<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>    )</span>
-<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>  <span class="fu">bind_rows</span>(<span class="at">.id =</span> <span class="st">&quot;rsid&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>  </span>
-<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>  <span class="co"># optionally, reformat output - first extract genomic coordinates and alleles</span></span>
-<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">separate</span>(</span>
-<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>    <span class="at">col =</span> <span class="st">&quot;variantId&quot;</span>,</span>
-<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a>    <span class="at">into =</span> <span class="fu">c</span>(</span>
-<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a>      <span class="st">&quot;chromosome&quot;</span>,</span>
-<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a>      <span class="st">&quot;position&quot;</span>,</span>
-<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a>      <span class="st">&quot;reference_allele&quot;</span>,</span>
-<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a>      <span class="st">&quot;alternative_allele&quot;</span>,</span>
-<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a>      <span class="st">&quot;genome_build&quot;</span></span>
-<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a>    ),</span>
-<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a>    <span class="at">sep =</span> <span class="st">&quot;_&quot;</span></span>
-<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a>  </span>
-<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a>  <span class="co"># ...then ascertain alternative_allele frequency</span></span>
-<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a>    <span class="at">alt_allele_count =</span> (<span class="dv">2</span> <span class="sc">*</span> homoAltCount) <span class="sc">+</span> hetCount,</span>
-<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a>    <span class="at">total_allele_count =</span> <span class="dv">2</span> <span class="sc">*</span> (homoAltCount <span class="sc">+</span> hetCount <span class="sc">+</span>  homoRefCount),</span>
-<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a>    <span class="at">alternative_allele_frequency =</span> alt_allele_count <span class="sc">/</span> total_allele_count</span>
-<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a>  </span>
-<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a>  <span class="fu">select</span>(</span>
-<span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a>    rsid,</span>
-<span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a>    <span class="at">beta =</span> nes,</span>
-<span id="cb6-37"><a href="#cb6-37" tabindex="-1"></a>    <span class="at">se =</span> error,</span>
-<span id="cb6-38"><a href="#cb6-38" tabindex="-1"></a>    pValue,</span>
-<span id="cb6-39"><a href="#cb6-39" tabindex="-1"></a>    <span class="at">minor_allele_frequency =</span> maf,</span>
-<span id="cb6-40"><a href="#cb6-40" tabindex="-1"></a>    alternative_allele_frequency,</span>
-<span id="cb6-41"><a href="#cb6-41" tabindex="-1"></a>    chromosome<span class="sc">:</span>genome_build,</span>
-<span id="cb6-42"><a href="#cb6-42" tabindex="-1"></a>    tissueSiteDetailId</span>
-<span id="cb6-43"><a href="#cb6-43" tabindex="-1"></a>  )</span>
-<span id="cb6-44"><a href="#cb6-44" tabindex="-1"></a><span class="co">#&gt; # A tibble: 3 × 12</span></span>
-<span id="cb6-45"><a href="#cb6-45" tabindex="-1"></a><span class="co">#&gt;   rsid         beta     se  pValue minor_allele_frequency alternative_allele_f…¹</span></span>
-<span id="cb6-46"><a href="#cb6-46" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;       &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;                  &lt;dbl&gt;                  &lt;dbl&gt;</span></span>
-<span id="cb6-47"><a href="#cb6-47" tabindex="-1"></a><span class="co">#&gt; 1 rs121191…  0.0270 0.0670 6.88e-1                 0.365                   0.635</span></span>
-<span id="cb6-48"><a href="#cb6-48" tabindex="-1"></a><span class="co">#&gt; 2 rs6605071 -0.601  0.166  3.88e-4                 0.0409                  0.959</span></span>
-<span id="cb6-49"><a href="#cb6-49" tabindex="-1"></a><span class="co">#&gt; 3 rs1053870  0.0247 0.0738 7.38e-1                 0.214                   0.214</span></span>
-<span id="cb6-50"><a href="#cb6-50" tabindex="-1"></a><span class="co">#&gt; # ℹ abbreviated name: ¹​alternative_allele_frequency</span></span>
-<span id="cb6-51"><a href="#cb6-51" tabindex="-1"></a><span class="co">#&gt; # ℹ 6 more variables: chromosome &lt;chr&gt;, position &lt;chr&gt;, reference_allele &lt;chr&gt;,</span></span>
-<span id="cb6-52"><a href="#cb6-52" tabindex="-1"></a><span class="co">#&gt; #   alternative_allele &lt;chr&gt;, genome_build &lt;chr&gt;, tissueSiteDetailId &lt;chr&gt;</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>variants_of_interest <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;rs12119111&quot;</span>, <span class="st">&quot;rs6605071&quot;</span>, <span class="st">&quot;rs1053870&quot;</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>variants_of_interest <span class="sc">|&gt;</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="fu">set_names</span>() <span class="sc">|&gt;</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  <span class="fu">map</span>(</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>    \(x) <span class="fu">calculate_expression_quantitative_trait_loci</span>(</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>      <span class="at">tissueSiteDetailId =</span> <span class="st">&quot;Liver&quot;</span>,</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>      <span class="at">gencodeId =</span> <span class="st">&quot;ENSG00000237973.1&quot;</span>,</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>      <span class="at">variantId =</span> x</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>    )</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>  <span class="fu">bind_rows</span>(<span class="at">.id =</span> <span class="st">&quot;rsid&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>  <span class="co"># optionally, reformat output - first extract genomic coordinates and alleles</span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">separate</span>(</span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>    <span class="at">col =</span> <span class="st">&quot;variantId&quot;</span>,</span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>    <span class="at">into =</span> <span class="fu">c</span>(</span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a>      <span class="st">&quot;chromosome&quot;</span>,</span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a>      <span class="st">&quot;position&quot;</span>,</span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a>      <span class="st">&quot;reference_allele&quot;</span>,</span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a>      <span class="st">&quot;alternative_allele&quot;</span>,</span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a>      <span class="st">&quot;genome_build&quot;</span></span>
+<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a>    ),</span>
+<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a>    <span class="at">sep =</span> <span class="st">&quot;_&quot;</span></span>
+<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a>  <span class="co"># ...then ascertain alternative_allele frequency</span></span>
+<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a>    <span class="at">alt_allele_count =</span> (<span class="dv">2</span> <span class="sc">*</span> homoAltCount) <span class="sc">+</span> hetCount,</span>
+<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a>    <span class="at">total_allele_count =</span> <span class="dv">2</span> <span class="sc">*</span> (homoAltCount <span class="sc">+</span> hetCount <span class="sc">+</span> homoRefCount),</span>
+<span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a>    <span class="at">alternative_allele_frequency =</span> alt_allele_count <span class="sc">/</span> total_allele_count</span>
+<span id="cb9-30"><a href="#cb9-30" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb9-31"><a href="#cb9-31" tabindex="-1"></a>  <span class="fu">select</span>(</span>
+<span id="cb9-32"><a href="#cb9-32" tabindex="-1"></a>    rsid,</span>
+<span id="cb9-33"><a href="#cb9-33" tabindex="-1"></a>    <span class="at">beta =</span> nes,</span>
+<span id="cb9-34"><a href="#cb9-34" tabindex="-1"></a>    <span class="at">se =</span> error,</span>
+<span id="cb9-35"><a href="#cb9-35" tabindex="-1"></a>    pValue,</span>
+<span id="cb9-36"><a href="#cb9-36" tabindex="-1"></a>    <span class="at">minor_allele_frequency =</span> maf,</span>
+<span id="cb9-37"><a href="#cb9-37" tabindex="-1"></a>    alternative_allele_frequency,</span>
+<span id="cb9-38"><a href="#cb9-38" tabindex="-1"></a>    chromosome<span class="sc">:</span>genome_build,</span>
+<span id="cb9-39"><a href="#cb9-39" tabindex="-1"></a>    tissueSiteDetailId</span>
+<span id="cb9-40"><a href="#cb9-40" tabindex="-1"></a>  )</span>
+<span id="cb9-41"><a href="#cb9-41" tabindex="-1"></a><span class="co">#&gt; # A tibble: 3 × 12</span></span>
+<span id="cb9-42"><a href="#cb9-42" tabindex="-1"></a><span class="co">#&gt;   rsid         beta     se  pValue minor_allele_frequency alternative_allele_f…¹</span></span>
+<span id="cb9-43"><a href="#cb9-43" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;       &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;                  &lt;dbl&gt;                  &lt;dbl&gt;</span></span>
+<span id="cb9-44"><a href="#cb9-44" tabindex="-1"></a><span class="co">#&gt; 1 rs121191…  0.0270 0.0670 6.88e-1                 0.365                   0.635</span></span>
+<span id="cb9-45"><a href="#cb9-45" tabindex="-1"></a><span class="co">#&gt; 2 rs6605071 -0.601  0.166  3.88e-4                 0.0409                  0.959</span></span>
+<span id="cb9-46"><a href="#cb9-46" tabindex="-1"></a><span class="co">#&gt; 3 rs1053870  0.0247 0.0738 7.38e-1                 0.214                   0.214</span></span>
+<span id="cb9-47"><a href="#cb9-47" tabindex="-1"></a><span class="co">#&gt; # ℹ abbreviated name: ¹​alternative_allele_frequency</span></span>
+<span id="cb9-48"><a href="#cb9-48" tabindex="-1"></a><span class="co">#&gt; # ℹ 6 more variables: chromosome &lt;chr&gt;, position &lt;chr&gt;, reference_allele &lt;chr&gt;,</span></span>
+<span id="cb9-49"><a href="#cb9-49" tabindex="-1"></a><span class="co">#&gt; #   alternative_allele &lt;chr&gt;, genome_build &lt;chr&gt;, tissueSiteDetailId &lt;chr&gt;</span></span></code></pre></div>
 </div>
+</div>
+<div class="footnotes footnotes-end-of-document">
+<hr />
+<ol>
+<li id="fn1"><p>With the exception of
+<code>get_sample_biobank_data()</code> and
+<code>get_sample_datasets()</code>, for which ‘get_sample’ is
+additionally appended with their respective category titles
+‘biobank_data’ and ‘datasets’.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
 </div>
 
 

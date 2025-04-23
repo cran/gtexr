@@ -12,7 +12,7 @@
 #'
 #' @inheritParams gtexr_arguments
 #'
-#' @return A tibble
+#' @returns A tibble. Or a list if `.return_raw = TRUE`.
 #' @export
 #' @family Reference Genome Endpoints
 #'
@@ -24,6 +24,8 @@ get_genes <- function(geneIds,
                       gencodeVersion = "v26",
                       genomeBuild = "GRCh38/hg38",
                       page = 0,
-                      itemsPerPage = 250) {
+                      itemsPerPage = getOption("gtexr.itemsPerPage"),
+                      .verbose = getOption("gtexr.verbose"),
+                      .return_raw = FALSE) {
   gtex_query(endpoint = "reference/gene")
 }

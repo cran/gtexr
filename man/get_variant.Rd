@@ -7,11 +7,13 @@
 get_variant(
   snpId = NULL,
   variantId = NULL,
-  chromosome = NULL,
-  pos = NULL,
   datasetId = "gtex_v8",
+  chromosome = NULL,
+  poss = NULL,
   page = 0,
-  itemsPerPage = 250
+  itemsPerPage = getOption("gtexr.itemsPerPage"),
+  .verbose = getOption("gtexr.verbose"),
+  .return_raw = FALSE
 )
 }
 \arguments{
@@ -19,22 +21,29 @@ get_variant(
 
 \item{variantId}{String. A gtex variant ID.}
 
+\item{datasetId}{String. Unique identifier of a dataset. Usually includes a
+data source and data release. Options: "gtex_v8", "gtex_snrnaseq_pilot".}
+
 \item{chromosome}{String. One of "chr1", "chr2", "chr3", "chr4", "chr5",
 "chr6", "chr7", "chr8", "chr9", "chr10", "chr11", "chr12", "chr13",
 "chr14", "chr15", "chr16", "chr17", "chr18", "chr19", "chr20", "chr21",
 "chr22", "chrM", "chrX", "chrY".}
 
-\item{pos}{Integer, vector.}
-
-\item{datasetId}{String. Unique identifier of a dataset. Usually includes a
-data source and data release. Options: "gtex_v8", "gtex_snrnaseq_pilot".}
+\item{poss}{Integer, vector.}
 
 \item{page}{Integer (default = 0).}
 
-\item{itemsPerPage}{Integer (default = 250).}
+\item{itemsPerPage}{Integer (default = 250). Set globally to maximum value
+100000 with \code{options(list(gtexr.itemsPerPage = 100000))}.}
+
+\item{.verbose}{Logical. If \code{TRUE} (default), print paging information. Set
+to \code{FALSE} globally with \code{options(list(gtexr.verbose = FALSE))}.}
+
+\item{.return_raw}{Logical. If \code{TRUE}, return the raw API JSON response.
+Default = \code{FALSE}}
 }
 \value{
-A tibble.
+A tibble. Or a list if \code{.return_raw = TRUE}.
 }
 \description{
 This service returns information about a variant, including
@@ -58,8 +67,10 @@ get_variant(snpId = "rs1410858")
 get_variant(variantId = "chr1_153209640_C_A_b38")
 
 # search by chromosome and position
-get_variant(chromosome = "chr1",
-            pos = 153209600:153209700)
+get_variant(
+  chromosome = "chr1",
+  pos = 153209600:153209700
+)
 }
 \seealso{
 Other Datasets Endpoints: 
@@ -71,7 +82,7 @@ Other Datasets Endpoints:
 \code{\link{get_functional_annotation}()},
 \code{\link{get_linkage_disequilibrium_by_variant_data}()},
 \code{\link{get_linkage_disequilibrium_data}()},
-\code{\link{get_sample_datasets_endpoints}()},
+\code{\link{get_sample_datasets}()},
 \code{\link{get_subject}()},
 \code{\link{get_tissue_site_detail}()},
 \code{\link{get_variant_by_location}()}
